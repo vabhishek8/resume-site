@@ -297,6 +297,14 @@ h1, h2, h3 {
   width: 100%;
   max-width: 320px;
   aspect-ratio: 3 / 4;
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, black 18%, black 78%, transparent 100%),
+    linear-gradient(to right, transparent 0%, black 20%, black 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, black 18%, black 78%, transparent 100%),
+    linear-gradient(to right, transparent 0%, black 20%, black 100%);
+  mask-composite: intersect;
 }
 .portrait-frame img {
   width: 100%;
@@ -304,21 +312,19 @@ h1, h2, h3 {
   object-fit: cover;
   object-position: top center;
   display: block;
-  filter: saturate(0.96);
+  filter: grayscale(0.55) saturate(0.75) contrast(1.04) brightness(0.92);
+  opacity: 0.55;
+  mix-blend-mode: luminosity;
 }
-.frame-corner {
+.portrait-frame::after {
+  content: "";
   position: absolute;
-  width: 26px;
-  height: 26px;
-  border-style: solid;
-  border-width: 0;
-  opacity: 0.85;
+  inset: 0;
+  background: linear-gradient(160deg, var(--teal-dim), transparent 45%, var(--amber-dim));
+  mix-blend-mode: overlay;
   pointer-events: none;
 }
-.frame-corner.tl { top: -8px; left: -8px; border-top-width: 2px; border-left-width: 2px; border-color: var(--accent-amber); }
-.frame-corner.tr { top: -8px; right: -8px; border-top-width: 2px; border-right-width: 2px; border-color: var(--accent-teal); }
-.frame-corner.bl { bottom: -8px; left: -8px; border-bottom-width: 2px; border-left-width: 2px; border-color: var(--accent-teal); }
-.frame-corner.br { bottom: -8px; right: -8px; border-bottom-width: 2px; border-right-width: 2px; border-color: var(--accent-amber); }
+.frame-corner { display: none; }
 
 @media (max-width: 900px) {
   .hero-inner { grid-template-columns: 1fr; gap: 40px; }
