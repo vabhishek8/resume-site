@@ -1,0 +1,65 @@
+name: Azure Static Web Apps CI/CD
+
+# Builds and deploys the static site to Azure Static Web Apps on every push to
+# main, and manages the ephemeral preview environment for pull requests.
+#
+# Prereqs before this workflow will run successfully:
+#   1. An Azure Static Web App resource must exist and be linked to this repo
+#      (see DEPLOY.md).
+#   2. Its deployment token must be stored as a repo secret named
+#      AZURE_STATIC_WEB_APPS_API_TOKEN (Settings -> Secrets and variables ->
+#      Actions -> New repository secret).
+#
+# NOTE: If you create the Azure Static Web App resource via the Azure Portal
+# and point it at this GitHub repo, Azure will offer to auto-generate a
+# workflow file for you. Do NOT accept that if this file already exists in
+# the repo — you'll end up with two competing workflows deploying the same
+# app. See DEPLOY.md step 2 for how to handle this.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+          lfs: false
+
+      - name: Build and Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # used for Github integrations (e.g. PR comments)
+          action: "upload"
+          app_location: "/"        # site root — index.html lives here
+          api_location: ""         # no Azure Functions API in this project
+          output_location: ""      # static HTML/CSS/JS, no build step required
+          skip_app_build: true
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "close"
