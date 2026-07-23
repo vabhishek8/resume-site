@@ -323,7 +323,11 @@ h1, h2, h3 {
 @media (max-width: 900px) {
   .hero-inner { grid-template-columns: 1fr; gap: 40px; }
   .hero-portrait { justify-self: center; }
-  .portrait-frame { max-width: 240px; }
+  .portrait-frame { max-width: 220px; }
+}
+
+@media (max-width: 560px) {
+  .portrait-frame { max-width: 168px; }
 }
 
 .eyebrow {
