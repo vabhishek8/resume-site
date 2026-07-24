@@ -125,6 +125,23 @@ h1, h2, h3 {
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
 }
 
+/* ---------- Scroll progress bar ---------- */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-teal), var(--accent-amber));
+  z-index: 1000;
+  transform-origin: left;
+  transition: width 80ms linear;
+  box-shadow: 0 0 10px rgba(242, 165, 65, 0.5);
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress { transition: none; }
+}
+
 /* ---------- Header / Nav ---------- */
 .site-header {
   position: sticky;
@@ -133,6 +150,12 @@ h1, h2, h3 {
   background: rgba(10, 14, 20, 0.78);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-soft);
+  transition: background var(--dur-med) var(--ease), border-color var(--dur-med) var(--ease), box-shadow var(--dur-med) var(--ease);
+}
+.site-header.is-scrolled {
+  background: rgba(10, 14, 20, 0.92);
+  border-bottom-color: var(--border);
+  box-shadow: 0 8px 30px -14px rgba(0, 0, 0, 0.65);
 }
 
 .header-inner {
@@ -632,7 +655,21 @@ li[data-level="1"] .bar-fill { --lvl: 20%; }
   bottom: 6px;
   width: 2px;
   background: linear-gradient(var(--accent-amber), var(--accent-teal));
-  opacity: 0.4;
+  opacity: 0.25;
+}
+.timeline::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 6px;
+  width: 2px;
+  height: calc(var(--tl-progress, 0) * 100%);
+  background: linear-gradient(var(--accent-amber-strong), var(--accent-teal-strong));
+  box-shadow: 0 0 8px rgba(242, 165, 65, 0.55);
+  transition: height 60ms linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .timeline::after { transition: none; }
 }
 .timeline-item {
   position: relative;
@@ -649,6 +686,11 @@ li[data-level="1"] .bar-fill { --lvl: 20%; }
   border-radius: 50%;
   background: var(--bg);
   border: 2px solid var(--accent-amber);
+  transition: box-shadow var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
+}
+.timeline-item.in-view .timeline-marker {
+  box-shadow: 0 0 0 5px rgba(242, 165, 65, 0.16), 0 0 14px rgba(242, 165, 65, 0.5);
+  transform: scale(1.08);
 }
 .timeline-head {
   display: flex;
@@ -699,10 +741,12 @@ li[data-level="1"] .bar-fill { --lvl: 20%; }
   gap: 24px;
 }
 .project-card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 28px 26px;
+  overflow: hidden;
   transition: border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
 .project-card:hover {
@@ -746,6 +790,28 @@ li[data-level="1"] .bar-fill { --lvl: 20%; }
 .project-featured:hover {
   border-color: var(--accent-amber);
   transform: translateY(-3px);
+}
+
+/* ---------- Cursor spotlight (JS sets --mx/--my on mousemove) ---------- */
+.spotlight { position: relative; overflow: hidden; }
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(242, 165, 65, 0.13), transparent 70%);
+  transition: opacity var(--dur-med) var(--ease);
+}
+.spotlight:hover::before { opacity: 1; }
+.spotlight > * { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .spotlight::before { display: none; }
+}
+@media (hover: none) {
+  .spotlight::before { display: none; }
 }
 .project-featured-badge {
   display: inline-flex;
