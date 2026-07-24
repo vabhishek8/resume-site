@@ -297,8 +297,6 @@ h1, h2, h3 {
   width: 100%;
   max-width: 320px;
   aspect-ratio: 3 / 4;
-  mask-image: radial-gradient(ellipse 62% 70% at 50% 34%, black 28%, transparent 96%);
-  -webkit-mask-image: radial-gradient(ellipse 62% 70% at 50% 34%, black 28%, transparent 96%);
 }
 .portrait-frame img {
   width: 100%;
@@ -306,27 +304,20 @@ h1, h2, h3 {
   object-fit: cover;
   object-position: top center;
   display: block;
-  filter: grayscale(0.65) saturate(0.7) contrast(1.05) brightness(0.85);
-  opacity: 0.58;
-}
-.portrait-frame::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(160deg, rgba(79, 216, 196, 0.3), transparent 45%, rgba(242, 165, 65, 0.26));
-  mix-blend-mode: overlay;
-  pointer-events: none;
+  filter: saturate(0.88) contrast(1.02);
+  opacity: 0.92;
 }
 .frame-corner { display: none; }
 
 @media (max-width: 900px) {
   .hero-inner { grid-template-columns: 1fr; gap: 40px; }
   .hero-portrait { justify-self: center; }
-  .portrait-frame { max-width: 220px; }
+  .portrait-frame { max-width: 200px; }
 }
 
 @media (max-width: 560px) {
-  .portrait-frame { max-width: 168px; }
+  .hero-portrait { margin-top: -12px; }
+  .portrait-frame { max-width: 152px; }
 }
 
 .eyebrow {
