@@ -133,4 +133,128 @@
   } else {
     skillCards.forEach(function (card) { card.classList.add("in-view"); });
   }
+
+  /* ---------- Scroll progress bar ---------- */
+  var progressBar = document.getElementById("scrollProgress");
+  var siteHeader = document.querySelector(".site-header");
+  var heroNet = document.querySelector(".hero-net");
+  var heroSection = document.querySelector(".hero");
+  var timelineEl = document.querySelector(".timeline");
+  var ticking = false;
+
+  function onScrollFrame() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0;
+
+    if (progressBar) progressBar.style.width = (pct * 100) + "%";
+    if (siteHeader) siteHeader.classList.toggle("is-scrolled", scrollTop > 8);
+
+    if (heroNet && heroSection && !reduceMotion) {
+      var heroRect = heroSection.getBoundingClientRect();
+      if (heroRect.bottom > 0 && heroRect.top < window.innerHeight) {
+        var shift = scrollTop * 0.12;
+        heroNet.style.transform = "translateY(" + shift.toFixed(1) + "px)";
+      }
+    }
+
+    if (timelineEl) {
+      var tlRect = timelineEl.getBoundingClientRect();
+      var viewportMid = window.innerHeight * 0.72;
+      var total = tlRect.height;
+      var traveled = viewportMid - tlRect.top;
+      var tlPct = total > 0 ? Math.min(1, Math.max(0, traveled / total)) : 0;
+      timelineEl.style.setProperty("--tl-progress", tlPct.toFixed(3));
+    }
+
+    ticking = false;
+  }
+
+  function requestScrollTick() {
+    if (!ticking) {
+      window.requestAnimationFrame(onScrollFrame);
+      ticking = true;
+    }
+  }
+
+  if (progressBar || siteHeader || timelineEl || (heroNet && !reduceMotion)) {
+    window.addEventListener("scroll", requestScrollTick, { passive: true });
+    window.addEventListener("resize", requestScrollTick);
+    onScrollFrame();
+  }
+
+  /* ---------- Timeline marker light-up on view ---------- */
+  var timelineItems = Array.prototype.slice.call(document.querySelectorAll(".timeline-item"));
+  if (timelineItems.length && "IntersectionObserver" in window) {
+    var tlObserver = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          entry.target.classList.toggle("in-view", entry.isIntersecting);
+        });
+      },
+      { threshold: 0.4 }
+    );
+    timelineItems.forEach(function (item) { tlObserver.observe(item); });
+  } else {
+    timelineItems.forEach(function (item) { item.classList.add("in-view"); });
+  }
+
+  /* ---------- Animated stat counters ---------- */
+  var statNums = Array.prototype.slice.call(document.querySelectorAll(".stat-num[data-count-to]"));
+  if (statNums.length) {
+    if ("IntersectionObserver" in window && !reduceMotion) {
+      var countObserver = new IntersectionObserver(
+        function (entries, obs) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var el = entry.target;
+            var target = parseFloat(el.getAttribute("data-count-to"));
+            var prefix = el.getAttribute("data-prefix") || "";
+            var suffix = el.getAttribute("data-suffix") || "";
+            var duration = 1200;
+            var startTime = null;
+
+            function step(ts) {
+              if (startTime === null) startTime = ts;
+              var elapsed = ts - startTime;
+              var t = Math.min(1, elapsed / duration);
+              var eased = 1 - Math.pow(1 - t, 3);
+              var current = Math.round(target * eased);
+              el.textContent = prefix + current + suffix;
+              if (t < 1) window.requestAnimationFrame(step);
+              else el.textContent = prefix + target + suffix;
+            }
+            window.requestAnimationFrame(step);
+            obs.unobserve(el);
+          });
+        },
+        { threshold: 0.4 }
+      );
+      statNums.forEach(function (el) { countObserver.observe(el); });
+    } else {
+      statNums.forEach(function (el) {
+        var target = el.getAttribute("data-count-to");
+        var prefix = el.getAttribute("data-prefix") || "";
+        var suffix = el.getAttribute("data-suffix") || "";
+        el.textContent = prefix + target + suffix;
+      });
+    }
+  }
+
+  /* ---------- Cursor spotlight on cards ---------- */
+  if (!reduceMotion && window.matchMedia("(hover: hover)").matches) {
+    var spotlightEls = Array.prototype.slice.call(
+      document.querySelectorAll(".project-card, .project-featured, .skill-card, .stat-card")
+    );
+    spotlightEls.forEach(function (el) {
+      el.classList.add("spotlight");
+      el.addEventListener("mousemove", function (e) {
+        var rect = el.getBoundingClientRect();
+        var x = ((e.clientX - rect.left) / rect.width) * 100;
+        var y = ((e.clientY - rect.top) / rect.height) * 100;
+        el.style.setProperty("--mx", x + "%");
+        el.style.setProperty("--my", y + "%");
+      });
+    });
+  }
 })();
