@@ -351,6 +351,29 @@
           </div>
         </article>
 
+        <article class="project-featured" data-reveal>
+          <div>
+            <span class="project-featured-badge"><span class="dot" aria-hidden="true"></span>Live pipeline · scheduled daily</span>
+            <h3>AML Transaction Monitoring Pipeline — banking / financial services</h3>
+            <p>
+              A rule-based transaction-monitoring pipeline built for a banking-industry pivot: detects five real
+              AML typologies — structuring, layering, impossible-travel, statistical amount outliers, high-risk-corridor
+              routing — in SQL, validated with case-level recall tests against a synthetic ground truth (no real
+              transaction data exists publicly, correctly). A naive mean/stddev outlier check initially caught only
+              20% of injected cases because the outlier was skewing its own baseline; switching to a robust
+              median/MAD statistic took that to 100% — documented as a regression-guarded test, not just a fix.
+              Bicep IaC is architected around what a bank's InfoSec review actually gates on: no public network
+              access anywhere, immutable audit-grade storage, and Microsoft Purview for BCBS 239-aligned data
+              governance.
+            </p>
+            <p class="project-featured-meta">Python · DuckDB (window functions, haversine SQL) · Plotly · pytest · GitHub Actions · Bicep (private endpoints, ADLS immutable storage, Purview, Key Vault RBAC)</p>
+          </div>
+          <div class="project-featured-actions">
+            <a class="btn btn-primary" href="https://github.com/vabhishek8/aml-transaction-monitoring-pipeline" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+            <a class="btn btn-ghost" href="https://vabhishek8.github.io/aml-transaction-monitoring-pipeline/" target="_blank" rel="noopener noreferrer">Live dashboard</a>
+          </div>
+        </article>
+
         <article class="project-card" data-reveal>
           <div class="project-tag-row">
             <span class="tag">Azure Data Factory</span><span class="tag">Databricks</span><span class="tag">ADLS</span>
