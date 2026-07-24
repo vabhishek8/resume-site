@@ -288,7 +288,15 @@ h1, h2, h3 {
   gap: 48px;
 }
 
-.hero-text { max-width: 640px; }
+.hero-text { max-width: 640px; position: relative; z-index: 1; }
+.hero-text::before {
+  content: "";
+  position: absolute;
+  inset: -24px -36px;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 92% 88% at 32% 42%, rgba(10, 14, 20, 0.82) 0%, rgba(10, 14, 20, 0.62) 48%, transparent 80%);
+}
 
 .hero-portrait { justify-self: end; }
 
