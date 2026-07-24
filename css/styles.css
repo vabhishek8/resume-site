@@ -295,8 +295,12 @@ h1, h2, h3 {
 .portrait-frame {
   position: relative;
   width: 100%;
-  max-width: 320px;
+  max-width: 280px;
   aspect-ratio: 3 / 4;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
 }
 .portrait-frame img {
   width: 100%;
@@ -304,20 +308,76 @@ h1, h2, h3 {
   object-fit: cover;
   object-position: top center;
   display: block;
-  filter: saturate(0.88) contrast(1.02);
-  opacity: 0.92;
+}
+.portrait-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, transparent 65%, rgba(10, 14, 20, 0.55) 100%);
+  pointer-events: none;
+}
+.portrait-frame .frame-tag {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  background: rgba(10, 14, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 4px 9px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+.portrait-frame .frame-tag .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-teal);
+  margin-right: 6px;
+  box-shadow: 0 0 6px var(--accent-teal);
 }
 .frame-corner { display: none; }
 
 @media (max-width: 900px) {
   .hero-inner { grid-template-columns: 1fr; gap: 40px; }
   .hero-portrait { justify-self: center; }
-  .portrait-frame { max-width: 200px; }
+  .portrait-frame { max-width: 220px; }
 }
 
 @media (max-width: 560px) {
-  .hero-portrait { margin-top: -12px; }
-  .portrait-frame { max-width: 152px; }
+  .portrait-frame { max-width: 180px; }
+}
+
+/* ---------- Stack diagram (hero background) ---------- */
+.net-label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  fill: var(--text-secondary);
+}
+.net-label-sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  fill: var(--text-muted);
+}
+.net-node-ring {
+  fill: none;
+  stroke-width: 1;
+  opacity: 0.5;
+}
+@media (max-width: 900px) {
+  .hero-net { opacity: 0.4; }
+  .net-label { font-size: 11px; }
+}
+@media (max-width: 560px) {
+  .hero-net-labels { display: none; }
 }
 
 .eyebrow {
