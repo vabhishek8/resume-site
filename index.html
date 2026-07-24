@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=7">
+<link rel="stylesheet" href="css/styles.css?v=8">
 </head>
 <body>
 
@@ -328,6 +328,27 @@
       <p class="section-lede" data-reveal>Drawn directly from delivery at Unisys — framed by architecture and outcome, not by dashboard count.</p>
 
       <div class="project-grid">
+        <article class="project-featured" data-reveal>
+          <div>
+            <span class="project-featured-badge"><span class="dot" aria-hidden="true"></span>Live pipeline · updates daily</span>
+            <h3>AU Weather Medallion Pipeline — bronze → silver → gold</h3>
+            <p>
+              A self-built, production-pattern data pipeline for five Australian capital cities: Open-Meteo archive
+              ingestion, an explicit data-quality gate (schema, nulls, range, duplicate, consistency checks), DuckDB
+              SQL for rolling 30-day anomaly detection and 90th-percentile extreme-heat flagging, orchestrated on a
+              real daily schedule via GitHub Actions with 15 passing pytest cases. Ships with Bicep IaC mapping the
+              same design to production Azure — ADF, ADLS Gen2, Synapse Serverless SQL, Key Vault, Log Analytics
+              alerting — deliberately not left running 24/7, because a standing cloud estate for a portfolio-scale
+              workload is a cost decision, not a demo requirement.
+            </p>
+            <p class="project-featured-meta">Python · DuckDB · Plotly · pytest · GitHub Actions · Bicep (ADF / ADLS Gen2 / Synapse)</p>
+          </div>
+          <div class="project-featured-actions">
+            <a class="btn btn-primary" href="https://github.com/vabhishek8/azure-medallion-weather-pipeline" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+            <a class="btn btn-ghost" href="https://vabhishek8.github.io/azure-medallion-weather-pipeline/" target="_blank" rel="noopener noreferrer">Live dashboard</a>
+          </div>
+        </article>
+
         <article class="project-card" data-reveal>
           <div class="project-tag-row">
             <span class="tag">Azure Data Factory</span><span class="tag">Databricks</span><span class="tag">ADLS</span>
