@@ -257,4 +257,59 @@
       });
     });
   }
+
+  /* ---------- Contact form submit ---------- */
+  var contactForm = document.getElementById("contactForm");
+  if (contactForm) {
+    var formStatus = document.getElementById("formStatus");
+    var submitBtn = contactForm.querySelector(".form-submit");
+
+    contactForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      var name = contactForm.elements["name"].value.trim();
+      var email = contactForm.elements["email"].value.trim();
+      var message = contactForm.elements["message"].value.trim();
+      var company = contactForm.elements["company"].value; // honeypot
+
+      formStatus.classList.remove("is-success", "is-error");
+
+      if (!name || !email || !message) {
+        formStatus.textContent = "Please fill in your name, email, and message.";
+        formStatus.classList.add("is-error");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      formStatus.textContent = "Sending...";
+
+      fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, email: email, message: message, company: company })
+      })
+        .then(function (res) {
+          return res.json().then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (result.ok) {
+            formStatus.textContent = "Message sent. I'll get back to you soon.";
+            formStatus.classList.add("is-success");
+            contactForm.reset();
+          } else {
+            formStatus.textContent = (result.data && result.data.error) || "Something went wrong. Try again later.";
+            formStatus.classList.add("is-error");
+          }
+        })
+        .catch(function () {
+          formStatus.textContent = "Network error. Try again later, or reach me on LinkedIn.";
+          formStatus.classList.add("is-error");
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+        });
+    });
+  }
 })();
