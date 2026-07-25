@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=9">
+<link rel="stylesheet" href="css/styles.css?v=10">
 </head>
 <body>
 
@@ -500,22 +500,37 @@
       <h2 id="contact-h" data-reveal>Let's talk data platforms</h2>
       <p class="section-lede" data-reveal>Open to Azure Data Engineer / Senior Data Engineer roles. Based in Sydney, open to relocation.</p>
 
-      <div class="contact-grid" data-reveal>
-        <a class="contact-card" href="mailto:vabhishek8@outlook.com">
-          <span class="contact-label">Email</span>
-          <span class="contact-value">vabhishek8@outlook.com</span>
-        </a>
-        <a class="contact-card" href="tel:+61450796996">
-          <span class="contact-label">Phone</span>
-          <span class="contact-value">0450 796 996</span>
-        </a>
-        <a class="contact-card" href="https://linkedin.com/in/abhishekvadlamudi" target="_blank" rel="noopener noreferrer">
-          <span class="contact-label">LinkedIn</span>
-          <span class="contact-value">linkedin.com/in/abhishekvadlamudi</span>
-        </a>
-        <div class="contact-card contact-card-static">
-          <span class="contact-label">Location</span>
-          <span class="contact-value">Sydney, NSW, Australia</span>
+      <div class="contact-layout" data-reveal>
+        <form class="contact-form" id="contactForm" novalidate>
+          <div class="form-field">
+            <label class="form-label" for="cf-name">Name</label>
+            <input class="form-input" type="text" id="cf-name" name="name" autocomplete="name" required maxlength="200">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="cf-email">Email</label>
+            <input class="form-input" type="email" id="cf-email" name="email" autocomplete="email" required maxlength="200">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="cf-message">Message</label>
+            <textarea class="form-input form-textarea" id="cf-message" name="message" rows="5" required maxlength="5000"></textarea>
+          </div>
+          <div class="form-field form-honeypot" aria-hidden="true">
+            <label for="cf-company">Company</label>
+            <input type="text" id="cf-company" name="company" tabindex="-1" autocomplete="off">
+          </div>
+          <button class="btn btn-primary form-submit" type="submit">Send message</button>
+          <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="contact-cards">
+          <a class="contact-card" href="https://linkedin.com/in/abhishekvadlamudi" target="_blank" rel="noopener noreferrer">
+            <span class="contact-label">LinkedIn</span>
+            <span class="contact-value">linkedin.com/in/abhishekvadlamudi</span>
+          </a>
+          <div class="contact-card contact-card-static">
+            <span class="contact-label">Location</span>
+            <span class="contact-value">Sydney, NSW, Australia</span>
+          </div>
         </div>
       </div>
     </div>
@@ -530,6 +545,6 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=2"></script>
+<script src="js/main.js?v=3"></script>
 </body>
 </html>
