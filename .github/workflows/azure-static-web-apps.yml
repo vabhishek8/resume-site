@@ -17,7 +17,7 @@ name: Azure Static Web Apps CI/CD
 # NOTE: If you create the Azure Static Web App resource via the Azure Portal
 # and point it at this GitHub repo, Azure will offer to auto-generate a
 # workflow file for you. Do NOT accept that if this file already exists in
-# the repo — you'll end up with two competing workflows deploying the same
+# the repo, you'll end up with two competing workflows deploying the same
 # app. See DEPLOY.md step 2 for how to handle this.
 
 on:
@@ -51,7 +51,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # used for Github integrations (e.g. PR comments)
           action: "upload"
-          app_location: "/"        # site root — index.html lives here
+          app_location: "/"        # site root, index.html lives here
           api_location: "api"      # Azure Functions API (contact form)
           output_location: ""      # static HTML/CSS/JS, no build step required
           skip_app_build: true
