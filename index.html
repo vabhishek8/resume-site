@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=10">
+<link rel="stylesheet" href="css/styles.css?v=11">
 </head>
 <body>
 
@@ -371,6 +371,28 @@
           <div class="project-featured-actions">
             <a class="btn btn-primary" href="https://github.com/vabhishek8/aml-transaction-monitoring-pipeline" target="_blank" rel="noopener noreferrer">View on GitHub</a>
             <a class="btn btn-ghost" href="https://vabhishek8.github.io/aml-transaction-monitoring-pipeline/" target="_blank" rel="noopener noreferrer">Live dashboard</a>
+          </div>
+        </article>
+
+        <article class="project-featured" data-reveal>
+          <div>
+            <span class="project-featured-badge"><span class="dot" aria-hidden="true"></span>Live pipeline · scheduled daily</span>
+            <h3>Basel III Liquidity Reporting Pipeline (LCR / NSFR)</h3>
+            <p>
+              A regulatory liquidity reporting pipeline computing LCR and NSFR for a synthetic bank's daily balance
+              sheet, structurally consistent with APRA APS 210 and the underlying BCBS238/BCBS295 standards, checked
+              against hand-calculated golden values rather than spot-checked for plausibility. A first implementation
+              of the HQLA cap applied only the 40% Level 2 total cap and missed the nested 15% Level 2B sub-cap
+              required by the spec, overstating HQLA by roughly $65 million (about 8%) on a Level 2B-heavy portfolio;
+              the fix is now a regression-guarded test, not just a corrected formula. Bicep IaC maps this workload's
+              actual shape: a Synapse Dedicated SQL Pool for a fixed nightly batch against a hard deadline, geo-redundant
+              storage, and separate pending-submission / submitted containers modelling a maker-checker control.
+            </p>
+            <p class="project-featured-meta">Python · DuckDB · Plotly · pytest · GitHub Actions · Bicep (Synapse Dedicated SQL Pool, ADLS Gen2 GRS, Key Vault RBAC)</p>
+          </div>
+          <div class="project-featured-actions">
+            <a class="btn btn-primary" href="https://github.com/vabhishek8/basel-liquidity-reporting-pipeline" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+            <a class="btn btn-ghost" href="https://vabhishek8.github.io/basel-liquidity-reporting-pipeline/" target="_blank" rel="noopener noreferrer">Live dashboard</a>
           </div>
         </article>
 
