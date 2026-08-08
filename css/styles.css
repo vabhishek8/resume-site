@@ -97,6 +97,47 @@ h1, h2, h3 {
   border-radius: 3px;
 }
 
+/* ---------- Boot transition (page load) ---------- */
+.boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-slow) var(--ease), visibility var(--dur-slow) var(--ease);
+}
+.boot-overlay.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.boot-mark .boot-line {
+  stroke-dasharray: 42;
+  stroke-dashoffset: 42;
+  animation: bootDraw 0.55s var(--ease) forwards 0.05s;
+}
+.boot-mark .boot-dot {
+  opacity: 0;
+  transform-origin: center;
+  transform: scale(0);
+  animation: bootPop 0.35s var(--ease) forwards;
+}
+.boot-mark .boot-dot-a { animation-delay: 0s; }
+.boot-mark .boot-dot-b { animation-delay: 0.45s; }
+@keyframes bootDraw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes bootPop {
+  to { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-overlay { display: none; }
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -497,6 +538,33 @@ h1, h2, h3 {
   font-size: 1.02rem;
 }
 
+/* ---------- Section arrival transition (in-page nav) ---------- */
+.section {
+  position: relative;
+}
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--accent-amber), var(--accent-teal));
+}
+.section.section-arrive::before {
+  animation: sectionSweep var(--dur-slow) var(--ease) forwards;
+}
+@keyframes sectionSweep {
+  0% { width: 0; opacity: 0.9; }
+  65% { width: 100%; opacity: 0.9; }
+  100% { width: 100%; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section.section-arrive::before { display: none; }
+}
+
 /* ---------- Reveal on scroll ---------- */
 [data-reveal] {
   opacity: 0;
@@ -747,11 +815,16 @@ li[data-level="1"] .bar-fill { --lvl: 20%; }
   border-radius: var(--radius);
   padding: 28px 26px;
   overflow: hidden;
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg)) translateY(0);
   transition: border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
 .project-card:hover {
   border-color: var(--accent-amber);
-  transform: translateY(-3px);
+  transform: perspective(900px) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg)) translateY(-3px);
+}
+@media (hover: none) {
+  .project-card { transform: none !important; }
 }
 .project-tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .tag {
