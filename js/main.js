@@ -3,6 +3,21 @@
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ---------- Boot transition ---------- */
+  var bootOverlay = document.getElementById("bootOverlay");
+  if (bootOverlay) {
+    if (reduceMotion) {
+      bootOverlay.remove();
+    } else {
+      window.setTimeout(function () {
+        bootOverlay.classList.add("is-hidden");
+        bootOverlay.addEventListener("transitionend", function () {
+          bootOverlay.remove();
+        }, { once: true });
+      }, 650);
+    }
+  }
+
   /* ---------- Footer year ---------- */
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -52,6 +67,15 @@
       window.setTimeout(function () {
         target.setAttribute("tabindex", "-1");
         target.focus({ preventScroll: true });
+
+        if (target.classList.contains("section") && !reduceMotion) {
+          target.classList.remove("section-arrive");
+          target.offsetWidth; // reflow, restarts the animation if retriggered quickly
+          target.classList.add("section-arrive");
+          window.setTimeout(function () {
+            target.classList.remove("section-arrive");
+          }, 950);
+        }
       }, reduceMotion ? 0 : 500);
     });
   });
@@ -254,6 +278,28 @@
         var y = ((e.clientY - rect.top) / rect.height) * 100;
         el.style.setProperty("--mx", x + "%");
         el.style.setProperty("--my", y + "%");
+      });
+    });
+  }
+
+  /* ---------- Card tilt on project cards ---------- */
+  if (!reduceMotion && window.matchMedia("(hover: hover)").matches) {
+    var tiltEls = Array.prototype.slice.call(document.querySelectorAll(".project-card"));
+    var tiltMax = 6; // degrees, kept subtle on purpose
+
+    tiltEls.forEach(function (el) {
+      el.addEventListener("mousemove", function (e) {
+        var rect = el.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / rect.width;
+        var py = (e.clientY - rect.top) / rect.height;
+        var rx = (px - 0.5) * (tiltMax * 2);
+        var ry = (0.5 - py) * (tiltMax * 2);
+        el.style.setProperty("--rx", rx.toFixed(2) + "deg");
+        el.style.setProperty("--ry", ry.toFixed(2) + "deg");
+      });
+      el.addEventListener("mouseleave", function () {
+        el.style.setProperty("--rx", "0deg");
+        el.style.setProperty("--ry", "0deg");
       });
     });
   }
