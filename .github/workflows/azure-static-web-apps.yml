@@ -15,6 +15,13 @@ name: Azure Static Web Apps CI/CD
 #      the Static Web App resource itself (Azure Portal -> Configuration),
 #      not from GitHub secrets. See docs/CONTACT_FORM_SETUP.md.
 #
+# NOTE: app_location below points at the BUILT output (dist), not the repo
+# root. When skip_app_build is true, the SWA deploy action treats
+# app_location as the folder to upload as-is -- output_location is ignored
+# in that mode. Do not set app_location back to "/" or the raw, unbundled
+# source index.html (referencing /src/main.jsx) will be deployed instead of
+# the Vite build, producing a blank page in production.
+#
 # NOTE: If you create the Azure Static Web App resource via the Azure Portal
 # and point it at this GitHub repo, Azure will offer to auto-generate a
 # workflow file for you. Do NOT accept that if this file already exists in
@@ -70,9 +77,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # used for Github integrations (e.g. PR comments)
           action: "upload"
-          app_location: "/"          # site root, index.html lives here
-          api_location: "api"        # Azure Functions API (contact form)
-          output_location: "dist"    # Vite build output
+          app_location: "dist"       # built output -- skip_app_build means this is deployed as-is
+          api_location: "api"        # Azure Functions API (contact form), relative to repo root
+          output_location: ""        # ignored when skip_app_build is true
           skip_app_build: true
 
   close_pull_request_job:
