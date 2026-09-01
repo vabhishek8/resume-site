@@ -1,6 +1,7 @@
 name: Azure Static Web Apps CI/CD
 
-# Builds and deploys the static site to Azure Static Web Apps on every push to
+# Builds the Vite/React/Three.js portfolio and deploys it, along with the
+# contact-form Azure Function, to Azure Static Web Apps on every push to
 # main, and manages the ephemeral preview environment for pull requests.
 #
 # Prereqs before this workflow will run successfully:
@@ -44,6 +45,24 @@ jobs:
           submodules: false
           lfs: false
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Copy static assets into build output
+        run: |
+          cp favicon.ico dist/favicon.ico
+          cp robots.txt dist/robots.txt
+          cp sitemap.xml dist/sitemap.xml
+          cp -r img dist/img
+
       - name: Build and Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -51,9 +70,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # used for Github integrations (e.g. PR comments)
           action: "upload"
-          app_location: "/"        # site root, index.html lives here
-          api_location: "api"      # Azure Functions API (contact form)
-          output_location: ""      # static HTML/CSS/JS, no build step required
+          app_location: "/"          # site root, index.html lives here
+          api_location: "api"        # Azure Functions API (contact form)
+          output_location: "dist"    # Vite build output
           skip_app_build: true
 
   close_pull_request_job:
