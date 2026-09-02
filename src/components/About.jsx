@@ -38,15 +38,6 @@ export default function About() {
               answers for stakeholders who just want to know if the numbers are right. That combination, architecture
               depth plus the ability to explain it, is what I bring to a Data Engineer role.
             </p>
-
-            {!reduceMotion && (
-              <div className="about-orbit-wrap" data-reveal>
-                <Suspense fallback={null}>
-                  <PipelineOrbit />
-                </Suspense>
-                <span className="about-orbit-hint">drag to orbit the pipeline</span>
-              </div>
-            )}
           </div>
 
           <div className="about-stats" data-reveal>
@@ -60,6 +51,20 @@ export default function About() {
             ))}
           </div>
         </div>
+
+        {!reduceMotion && (
+          <div className="about-orbit" data-reveal>
+            <div className="about-orbit-head">
+              <p className="about-orbit-label">Pipeline architecture, visualized</p>
+              <span className="about-orbit-hint">drag to orbit</span>
+            </div>
+            <div className="about-orbit-wrap">
+              <Suspense fallback={null}>
+                <PipelineOrbit />
+              </Suspense>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
