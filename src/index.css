@@ -206,7 +206,7 @@ h1, h2, h3 {
 
 /* ---------- About ---------- */
 .about-section { position: relative; overflow: hidden; }
-.about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; }
+.about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; align-items: start; }
 .about-copy p { color: var(--text-secondary); margin: 0 0 16px; }
 .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-content: start; }
 .stat-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 20px; overflow: hidden; }
@@ -215,10 +215,14 @@ h1, h2, h3 {
 @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; gap: 36px; } }
 @media (max-width: 560px) { .about-stats { grid-template-columns: 1fr 1fr; } }
 
-.about-orbit-wrap { position: relative; height: 420px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border-soft); background: radial-gradient(circle at 50% 50%, rgba(79,216,196,0.06), transparent 70%); }
+.about-orbit { margin-top: 56px; }
+.about-orbit-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.about-orbit-label { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin: 0; }
+.about-orbit-hint { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); }
+.about-orbit-wrap { position: relative; height: 440px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border-soft); background: radial-gradient(circle at 50% 50%, rgba(79,216,196,0.06), transparent 70%); }
 .about-orbit-wrap canvas { display: block; }
-.about-orbit-hint { position: absolute; bottom: 10px; right: 14px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); pointer-events: none; }
-@media (max-width: 900px) { .about-orbit-wrap { height: 320px; } }
+@media (max-width: 900px) { .about-orbit { margin-top: 36px; } .about-orbit-wrap { height: 340px; } }
+@media (max-width: 560px) { .about-orbit-head { flex-direction: column; align-items: flex-start; gap: 4px; } }
 
 /* ---------- Skills ---------- */
 .skills-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
