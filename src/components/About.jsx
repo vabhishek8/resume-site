@@ -1,7 +1,4 @@
-import { Suspense, lazy } from "react";
-import { useReducedMotion } from "../hooks/useReducedMotion.js";
-
-const PipelineOrbit = lazy(() => import("../three/PipelineOrbit.jsx"));
+import PipelineFlow from "./PipelineFlow.jsx";
 
 const STATS = [
   { to: 4, suffix: "+", label: "Years in data & BI engineering" },
@@ -11,8 +8,6 @@ const STATS = [
 ];
 
 export default function About() {
-  const reduceMotion = useReducedMotion();
-
   return (
     <section id="about" className="section about-section" aria-labelledby="about-h">
       <div className="wrap">
@@ -52,19 +47,13 @@ export default function About() {
           </div>
         </div>
 
-        {!reduceMotion && (
-          <div className="about-orbit" data-reveal>
-            <div className="about-orbit-head">
-              <p className="about-orbit-label">Pipeline architecture, visualized</p>
-              <span className="about-orbit-hint">drag to orbit</span>
-            </div>
-            <div className="about-orbit-wrap">
-              <Suspense fallback={null}>
-                <PipelineOrbit />
-              </Suspense>
-            </div>
+        <div className="about-flow" data-reveal>
+          <div className="about-flow-head">
+            <p className="about-flow-label">Pipeline architecture, in one line</p>
+            <span className="about-flow-hint">scroll to trace it</span>
           </div>
-        )}
+          <PipelineFlow />
+        </div>
       </div>
     </section>
   );
