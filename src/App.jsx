@@ -7,7 +7,6 @@ import Projects from "./components/Projects.jsx";
 import Education from "./components/Education.jsx";
 import Contact from "./components/Contact.jsx";
 import Footer from "./components/Footer.jsx";
-import MemojiGuide from "./components/MemojiGuide.jsx";
 import ScrollProgress from "./components/ScrollProgress.jsx";
 import { useSiteEffects } from "./hooks/useSiteEffects.js";
 
@@ -30,7 +29,6 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
-      <MemojiGuide />
     </>
   );
 }
