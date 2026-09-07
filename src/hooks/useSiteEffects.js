@@ -1,38 +1,65 @@
 import { useEffect } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Ports the behavior that used to live in main.js: reveal-on-scroll,
-// active nav highlighting, timeline progress, skill bar fill,
-// cursor spotlight glow, and nav-click section-arrival sweep + focus mgmt.
+gsap.registerPlugin(ScrollTrigger);
+
+// Scroll-storytelling engine: GSAP-batched reveals for a choreographed
+// section-by-section flow, plus the supporting motion (nav highlighting,
+// stat counters, skill bar fill, timeline progress, cursor spotlight,
+// nav-click focus management + section-arrival sweep).
 export function useSiteEffects() {
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ctx = gsap.context(() => {});
 
-    // Reveal on scroll
-    const revealEls = Array.from(document.querySelectorAll("[data-reveal]"));
-    let revealObserver;
-    if (revealEls.length) {
-      if ("IntersectionObserver" in window && !reduceMotion) {
-        revealObserver = new IntersectionObserver(
-          (entries, obs) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              const el = entry.target;
-              const parent = el.parentElement;
-              const siblings = parent
-                ? Array.from(parent.children).filter((c) => c.hasAttribute && c.hasAttribute("data-reveal"))
-                : [el];
-              const index = siblings.indexOf(el);
-              el.style.transitionDelay = Math.max(0, index) * 90 + "ms";
-              el.classList.add("is-visible");
-              obs.unobserve(el);
-            });
-          },
-          { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-        );
-        revealEls.forEach((el) => revealObserver.observe(el));
+    // Hero entrance: staggered, plays once on load, no scroll trigger.
+    const heroEls = Array.from(document.querySelectorAll(".hero [data-reveal]"));
+    if (heroEls.length) {
+      if (reduceMotion) {
+        heroEls.forEach((el) => el.classList.add("is-visible"));
       } else {
-        revealEls.forEach((el) => el.classList.add("is-visible"));
+        gsap.to(heroEls, {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power3.out",
+          stagger: 0.09,
+          delay: 0.15,
+          onStart: () => heroEls.forEach((el) => el.classList.add("is-visible")),
+          onComplete: () => heroEls.forEach((el) => (el.style.transform = ""))
+        });
       }
+    }
+
+    // Section-by-section reveal: batched per section so siblings arrive
+    // together with a short stagger, this is the "story" pacing.
+    const sectionsForReveal = Array.from(document.querySelectorAll("main > section"));
+    let revealTriggers = [];
+    if (!reduceMotion && "IntersectionObserver" in window) {
+      sectionsForReveal.forEach((section) => {
+        const els = Array.from(section.querySelectorAll("[data-reveal]"));
+        if (!els.length) return;
+        const trigger = ScrollTrigger.create({
+          trigger: section,
+          start: "top 78%",
+          once: true,
+          onEnter: () => {
+            gsap.to(els, {
+              opacity: 1,
+              y: 0,
+              duration: 0.9,
+              ease: "power3.out",
+              stagger: 0.09,
+              onStart: () => els.forEach((el) => el.classList.add("is-visible")),
+              onComplete: () => els.forEach((el) => (el.style.transform = ""))
+            });
+          }
+        });
+        revealTriggers.push(trigger);
+      });
+    } else {
+      document.querySelectorAll("[data-reveal]").forEach((el) => el.classList.add("is-visible"));
     }
 
     // Active nav link on scroll
@@ -107,7 +134,7 @@ export function useSiteEffects() {
       skillCards.forEach((c) => c.classList.add("in-view"));
     }
 
-    // Timeline light-up + progress
+    // Timeline light-up + scroll-linked progress
     const timelineItems = Array.from(document.querySelectorAll(".timeline-item"));
     let tlObserver;
     if (timelineItems.length && "IntersectionObserver" in window) {
@@ -141,7 +168,7 @@ export function useSiteEffects() {
       onScrollFrame();
     }
 
-    // Cursor spotlight (non-tilt elements)
+    // Cursor spotlight (project cards, skill cards, stat cards)
     let spotlightEls = [];
     function onSpotMove(e) {
       const el = e.currentTarget;
@@ -157,7 +184,7 @@ export function useSiteEffects() {
       });
     }
 
-    // Nav click: focus management + section-arrival sweep
+    // Nav click: focus management
     const navClickLinks = Array.from(document.querySelectorAll("a[data-nav]"));
     const handlers = [];
     navClickLinks.forEach((link) => {
@@ -169,12 +196,6 @@ export function useSiteEffects() {
         window.setTimeout(() => {
           target.setAttribute("tabindex", "-1");
           target.focus({ preventScroll: true });
-          if (target.classList.contains("section") && !reduceMotion) {
-            target.classList.remove("section-arrive");
-            void target.offsetWidth;
-            target.classList.add("section-arrive");
-            window.setTimeout(() => target.classList.remove("section-arrive"), 950);
-          }
         }, reduceMotion ? 0 : 500);
       }
       link.addEventListener("click", handler);
@@ -182,7 +203,7 @@ export function useSiteEffects() {
     });
 
     return () => {
-      revealObserver && revealObserver.disconnect();
+      revealTriggers.forEach((t) => t.kill());
       navObserver && navObserver.disconnect();
       skillObserver && skillObserver.disconnect();
       countObserver && countObserver.disconnect();
@@ -191,6 +212,7 @@ export function useSiteEffects() {
       window.removeEventListener("resize", requestTick);
       spotlightEls.forEach((el) => el.removeEventListener("mousemove", onSpotMove));
       handlers.forEach(([link, handler]) => link.removeEventListener("click", handler));
+      ctx.revert();
     };
   }, []);
 }
