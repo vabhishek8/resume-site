@@ -702,11 +702,13 @@ html:not(.anim) .display .wipe { display: none; }
 .guide.is-static { position: absolute; }
 .guide-svg {
   display: block; overflow: visible;
-  width: calc(220px * var(--s)); height: calc(320px * var(--s));
+  width: calc(400px * var(--s)); height: calc(340px * var(--s));
+  -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 99%);
+  mask-image: linear-gradient(to bottom, #000 80%, transparent 99%);
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.55));
 }
 .guide-bubble {
-  position: absolute; left: calc(110px * var(--s)); top: calc(14px * var(--s));
+  position: absolute; left: calc(204px * var(--s)); top: calc(46px * var(--s));
   transform: translate(-86%, -100%) scale(0.7); transform-origin: 86% 100%;
   opacity: 0; transition: opacity 0.3s ease, transform 0.45s var(--ease);
   padding: 9px 14px; border-radius: 14px;
