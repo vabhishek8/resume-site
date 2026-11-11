@@ -13,7 +13,6 @@ export const SITE = {
   role: { from: "Senior Business Intelligence Engineer", to: "Azure Data Engineer" },
   lede:
     "4+ years at Unisys engineering the data layer behind financial-services reporting: SQL Server and SSIS pipelines on-prem, Databricks and PySpark over ADLS and Synapse in Azure, and Azure DevOps-governed releases from DEV to PROD. Correct, on time, and loud when something breaks.",
-  portrait: "/img/portrait.jpg",
   linkedin: "https://linkedin.com/in/abhishekvadlamudi",
   linkedinLabel: "linkedin.com/in/abhishekvadlamudi",
   github: "https://github.com/vabhishek8",
@@ -131,7 +130,7 @@ export const EXPERIENCE = [
     role: "Senior Business Intelligence Engineer",
     org: "Unisys",
     place: "Sydney, NSW",
-    dates: "Mar 2025 — Present",
+    dates: "Mar 2025 to Present",
     bullets: [
       "Own the end-to-end pipeline lifecycle for financial-services client engagements: source extraction, transformation, validation, and delivery into reporting layers on SQL Server and Azure.",
       "Build and maintain production pipelines across SQL Server (stored procedures, SQL Agent, SSIS) and Azure Databricks / PySpark, landing data in Azure Data Lake Storage and Synapse.",
@@ -146,7 +145,7 @@ export const EXPERIENCE = [
     role: "Business Intelligence Engineer",
     org: "Unisys",
     place: "Sydney, NSW",
-    dates: "May 2024 — Mar 2025",
+    dates: "May 2024 to Mar 2025",
     bullets: [
       "Migrated a critical daily load from VBA and batch scripts to Python, cutting its runtime by 4 hours.",
       "Rebuilt the SQL and DAX models behind SLA and operational KPI reporting, eliminating recurring refresh failures.",
@@ -158,7 +157,7 @@ export const EXPERIENCE = [
     role: "Associate Business Intelligence Engineer",
     org: "Unisys",
     place: "Sydney, NSW",
-    dates: "Feb 2022 — May 2024",
+    dates: "Feb 2022 to May 2024",
     bullets: [
       "Built and automated operational reporting in Power BI, SSRS and Excel, establishing repeatable monthly delivery cycles.",
       "Wrote T-SQL for extraction, transformation and validation, and ran UAT to verify data across environments before release.",
@@ -169,7 +168,7 @@ export const EXPERIENCE = [
     role: "Commercial Banking Relationship Manager",
     org: "Axis Bank Ltd.",
     place: "Telangana, India",
-    dates: "Apr 2019 — Jan 2020",
+    dates: "Apr 2019 to Jan 2020",
     bullets: [
       "Exceeded department KPIs by 20% for 5 consecutive months managing trade finance and FX payment workflows across import/export channels.",
       "The banking-domain grounding behind my data work: I know what a regulator, a credit team and an operations desk each need from the same number."
@@ -265,7 +264,7 @@ export const EDUCATION = [
   {
     degree: "Master of Business Analytics",
     school: "Deakin University, Burwood, VIC",
-    dates: "Feb 2020 — Nov 2022",
+    dates: "Feb 2020 to Nov 2022",
     notes: [
       "Built sentiment analysis models on customer review data using Python.",
       "Delivered descriptive analytics and visualisation solutions for multiple clients using Power BI, Tableau, Python, and Excel."
@@ -274,13 +273,13 @@ export const EDUCATION = [
   {
     degree: "Post Graduate Diploma in Banking and Services",
     school: "Manipal University, Karnataka, India",
-    dates: "Jun 2018 — Jun 2019",
+    dates: "Jun 2018 to Jun 2019",
     notes: ["Distinction, GPA 8.97. Golden Key Society member (top 15% of cohort)."]
   },
   {
     degree: "Bachelor of Computer Science and Engineering",
     school: "Geetanjali College of Engineering and Technology, Telangana, India",
-    dates: "Sep 2014 — Jun 2018",
+    dates: "Sep 2014 to Jun 2018",
     notes: ["Major: Software Engineering, Database Management Systems."]
   }
 ];
