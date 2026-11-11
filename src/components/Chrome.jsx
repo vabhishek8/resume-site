@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NAV, SITE, MARQUEE } from "../content.js";
+import { NAV, SITE, MARQUEE, CHAPTERS } from "../content.js";
 
 /* Section heading: bold sans line(s) + italic serif line(s) + accent full stop.
    Characters are split for the kinetic reveal; screen readers get the plain text. */
@@ -84,20 +84,6 @@ export function Header() {
   );
 }
 
-export function Preloader() {
-  return (
-    <div className="preloader" aria-hidden="true">
-      <div className="pre-inner">
-        <p className="pre-line"><span>bronze</span><span className="pre-ok">landed</span></p>
-        <p className="pre-line"><span>silver</span><span className="pre-ok">quality-gated</span></p>
-        <p className="pre-line"><span>gold</span><span className="pre-ok">served</span></p>
-        <div className="pre-bar"><span></span></div>
-        <p className="pre-count"><span data-pre-count>000</span>%</p>
-      </div>
-    </div>
-  );
-}
-
 export function ScrollProgress() {
   return (
     <div className="scroll-progress" aria-hidden="true">
@@ -147,5 +133,47 @@ export function Footer() {
         <a href="#top" data-cursor="Top">Back to top &uarr;</a>
       </div>
     </footer>
+  );
+}
+
+/* Story rail: the page as one pipeline run. Fixed on wide screens; each
+   chapter is a stage and doubles as navigation. */
+export function StoryRail() {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const line = window.innerHeight * 0.5;
+      let idx = 0;
+      CHAPTERS.forEach((c, i) => {
+        const n = document.querySelector(c.sel);
+        if (n && n.getBoundingClientRect().top <= line) idx = i;
+      });
+      setActive(idx);
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(raf); };
+  }, []);
+  const go = (sel) => {
+    const n = document.querySelector(sel);
+    if (n) window.scrollTo({ top: n.getBoundingClientRect().top + window.scrollY - 10, behavior: "smooth" });
+  };
+  return (
+    <nav className="story-rail" aria-label="Story progress">
+      <ol>
+        {CHAPTERS.map((c, i) => (
+          <li key={c.label} className={(i === active ? "is-active " : "") + (i < active ? "is-done " : "") + "st-" + c.stage.toLowerCase()}>
+            <button type="button" onClick={() => go(c.sel)} aria-current={i === active ? "step" : undefined}>
+              <span className="sr-dot" aria-hidden="true"></span>
+              <span className="sr-text"><span className="sr-stage">{c.stage}</span><span className="sr-label">{c.label}</span></span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </nav>
   );
 }

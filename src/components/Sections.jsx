@@ -143,6 +143,35 @@ export function Skills() {
 }
 
 /* ── 03 Experience ────────────────────────────────────────────────────────── */
+const VISIBLE_BULLETS = 4;
+function Role({ e }) {
+  const [open, setOpen] = useState(false);
+  const extra = e.bullets.length - VISIBLE_BULLETS;
+  const shown = open || extra <= 0 ? e.bullets : e.bullets.slice(0, VISIBLE_BULLETS);
+  const listId = "tl-" + e.role.replace(/\W+/g, "-").toLowerCase() + "-" + e.dates.slice(0, 3).toLowerCase();
+  return (
+    <li className="tl-item" data-reveal>
+      <span className="tl-node" aria-hidden="true"></span>
+      <div className="tl-head">
+        <p className="tl-date">{e.dates}</p>
+        <h3>{e.role}</h3>
+        <p className="tl-org">{e.org} <span>· {e.place}</span></p>
+      </div>
+      <div className="tl-body">
+        <ul className="tl-list" id={listId}>
+          {shown.map((b, i) => <li key={i}>{b}</li>)}
+        </ul>
+        {extra > 0 ? (
+          <button type="button" className="tl-more" aria-expanded={open} aria-controls={listId} onClick={() => setOpen((v) => !v)}>
+            {open ? "Show fewer" : `Show all ${e.bullets.length}`}
+            <i aria-hidden="true"></i>
+          </button>
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
 export function Experience() {
   return (
     <section id="experience" className="section experience" aria-labelledby="exp-h">
@@ -150,19 +179,7 @@ export function Experience() {
       <div className="timeline" data-timeline>
         <span className="tl-rail" aria-hidden="true"><span className="tl-fill" data-tl-fill></span></span>
         <ol className="tl-ol">
-        {EXPERIENCE.map((e) => (
-          <li className="tl-item" key={e.role} data-reveal>
-            <span className="tl-node" aria-hidden="true"></span>
-            <div className="tl-head">
-              <p className="tl-date">{e.dates}</p>
-              <h3>{e.role}</h3>
-              <p className="tl-org">{e.org} <span>· {e.place}</span></p>
-            </div>
-            <ul className="tl-list">
-              {e.bullets.map((b, i) => <li key={i} data-reveal>{b}</li>)}
-            </ul>
-          </li>
-        ))}
+          {EXPERIENCE.map((e) => <Role e={e} key={e.role + e.dates} />)}
         </ol>
       </div>
     </section>
@@ -170,7 +187,7 @@ export function Experience() {
 }
 
 /* ── 04 Projects: pinned stacking case studies ────────────────────────────── */
-export function Projects() {
+export function Projects({ onOpenCase = () => {} }) {
   return (
     <section id="projects" className="section projects" aria-labelledby="proj-h">
       <Heading id="proj-h" label="Projects" lines={[["bold", "Selected"], ["serif", "engineering work"]]} />
@@ -199,8 +216,11 @@ export function Projects() {
                   {p.stack.map((s) => <li key={s}>{s}</li>)}
                 </ul>
                 <div className="case-actions">
-                  <a className="btn btn-primary" href={p.repo} target="_blank" rel="noopener noreferrer" data-magnetic data-cursor="Code">
-                    <span>View on GitHub</span><span className="btn-arrow" aria-hidden="true">↗</span>
+                  <button className="btn btn-primary" type="button" onClick={() => onOpenCase(p.id)} data-magnetic data-cursor="Open">
+                    <span>Read the case study</span><span className="btn-arrow" aria-hidden="true">&rarr;</span>
+                  </button>
+                  <a className="btn btn-ghost" href={p.repo} target="_blank" rel="noopener noreferrer" data-magnetic data-cursor="Code">
+                    <span>GitHub</span><span className="btn-arrow" aria-hidden="true">↗</span>
                   </a>
                   <a className="btn btn-ghost" href={p.live} target="_blank" rel="noopener noreferrer" data-magnetic data-cursor="Live">
                     <span>Live dashboard</span>

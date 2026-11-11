@@ -8,7 +8,16 @@ import { startPortrait } from "../lib/portraitField.js";
 export default function Portrait() {
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
-  useEffect(() => startPortrait(wrapRef.current, canvasRef.current), []);
+  useEffect(() => {
+    // Start after the first paint settles so the bake never competes with
+    // the hero intro for the main thread.
+    let stop = null;
+    const go = () => { stop = startPortrait(wrapRef.current, canvasRef.current); };
+    const ric = window.requestIdleCallback || ((fn) => setTimeout(fn, 400));
+    const cic = window.cancelIdleCallback || clearTimeout;
+    const id = ric(go, { timeout: 1500 });
+    return () => { cic(id); if (stop) stop(); };
+  }, []);
   return (
     <div className="portrait-layer" ref={wrapRef} aria-hidden="true">
       <canvas ref={canvasRef}></canvas>
