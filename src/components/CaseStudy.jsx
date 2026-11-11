@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PROJECTS } from "../content.js";
+import { lockScroll, unlockScroll } from "../lib/scrollLock.js";
 
 /* Case-study overlay: deep-linkable (#case-<id>), Esc / back to close,
    focus trapped while open, page scroll locked, focus restored on close. */
@@ -37,6 +38,7 @@ export function CaseStudy({ id, onClose }) {
     lastFocus.current = document.activeElement;
     const root = document.documentElement;
     root.classList.add("case-open");
+    lockScroll();
     const t = setTimeout(() => dlg.current && dlg.current.querySelector(".cs-close").focus(), 30);
     const onKey = (e) => {
       if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
@@ -51,6 +53,7 @@ export function CaseStudy({ id, onClose }) {
     return () => {
       clearTimeout(t);
       root.classList.remove("case-open");
+      unlockScroll();
       document.removeEventListener("keydown", onKey);
       if (lastFocus.current && lastFocus.current.focus) lastFocus.current.focus();
     };

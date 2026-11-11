@@ -57,9 +57,7 @@ export default function Hero() {
         </p>
 
         <p className="hero-role" data-hero>
-          <span>{SITE.role.from}</span>
-          <span className="role-arrow" aria-hidden="true"><i></i></span>
-          <span className="role-to">{SITE.role.to}</span>
+          <span>{SITE.role}</span>
         </p>
 
         <p className="hero-lede" data-hero>{SITE.lede}</p>

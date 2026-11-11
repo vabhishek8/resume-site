@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NAV, SITE, MARQUEE, CHAPTERS } from "../content.js";
+import { lockScroll, unlockScroll } from "../lib/scrollLock.js";
 
 /* Section heading: bold sans line(s) + italic serif line(s) + accent full stop.
    Characters are split for the kinetic reveal; screen readers get the plain text. */
@@ -37,6 +38,9 @@ export function Header() {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     document.documentElement.classList.toggle("menu-open", open);
+    if (!open) return undefined;
+    lockScroll();
+    return () => unlockScroll();
   }, [open]);
 
   return (
@@ -72,7 +76,18 @@ export function Header() {
         <ul>
           {NAV.map((l, i) => (
             <li key={l.id}>
-              <a href={`#${l.id}`} onClick={() => setOpen(false)}>
+              <a
+                href={`#${l.id}`}
+                onClick={(e) => {
+                  // close first so the scroll lock releases, then travel
+                  e.preventDefault();
+                  setOpen(false);
+                  setTimeout(() => {
+                    const t = document.getElementById(l.id);
+                    if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY, behavior: "smooth" });
+                  }, 60);
+                }}
+              >
                 {l.label}
               </a>
             </li>
