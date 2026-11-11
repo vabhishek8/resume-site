@@ -10,7 +10,7 @@ export const SITE = {
   location: "Sydney, AU",
   availability: "Open to relocation",
   tagline: { plain: "Building data platforms that", italic: "don't fall over at 2 a.m." },
-  role: { from: "Senior Business Intelligence Engineer", to: "Azure Data Engineer" },
+  role: "Senior Business Intelligence Engineer", // must match the LinkedIn title exactly
   lede:
     "4+ years at Unisys engineering the data layer behind financial-services reporting: SQL Server and SSIS pipelines on-prem, Databricks and PySpark over ADLS and Synapse in Azure, and Azure DevOps-governed releases from DEV to PROD. Correct, on time, and loud when something breaks.",
   linkedin: "https://linkedin.com/in/abhishekvadlamudi",

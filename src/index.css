@@ -33,8 +33,13 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; overflow-x: hidden; }
-@supports (overflow: clip) { html, body { overflow-x: clip; } }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+/* Horizontal overflow is clipped on the app root, never on html/body.
+   overflow on <body> while <html> is non-visible turns body into its own
+   scroll container; on iOS touch scrolls then land in body, which can only
+   move a few pixels, so the page appears frozen. clip creates no scroll
+   container and keeps position: sticky working. */
+#root { overflow-x: clip; }
 html.anim { scroll-behavior: auto; }
 body {
   margin: 0;
@@ -43,7 +48,6 @@ body {
   font: 400 16px/1.65 var(--f-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
@@ -229,7 +233,7 @@ html.anim .live-dot { animation: pulse 2s infinite; }
   overflow: hidden;
 }
 @supports (min-height: 100svh) { .hero { min-height: 100svh; } }
-.hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+.hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; touch-action: auto; }
 .hero-vignette {
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
@@ -521,7 +525,7 @@ html.anim .tl-fill { transform: scaleY(0); }
 .cert-note { margin-top: 20px; display: flex; gap: 12px; align-items: baseline; font-size: 14px; color: var(--ink-2); }
 
 /* ═══ CONTACT ════════════════════════════════════════════════════════════ */
-.contact { padding-bottom: 120px; isolation: isolate; }
+.contact { padding-bottom: 120px; isolation: isolate; overflow: hidden; }
 .contact .display { font-size: clamp(54px, 10vw, 170px); }
 .contact-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(36px, 6vw, 100px); align-items: start; }
 .cform { display: grid; gap: 14px; }
@@ -755,7 +759,7 @@ html.anim .contact-light { clip-path: circle(0% at 82% 100%); }
 
 /* ═══ Mobile menu: no content bleeding through ═════════════════════════ */
 html.menu-open .site-header { backdrop-filter: none; -webkit-backdrop-filter: none; background: transparent; transform: none; }
-html.menu-open, html.menu-open body { overflow: hidden; }
+/* scroll lock for the menu and overlays is done in JS (body position: fixed), which iOS respects */
 .mobile-nav { background: var(--bg); }
 
 @media (max-width: 899px) {
@@ -822,7 +826,7 @@ html.menu-open, html.menu-open body { overflow: hidden; }
 .tl-more[aria-expanded="true"] i { transform: rotate(-135deg) translateY(-2px); }
 
 /* ═══ Case-study overlay ═══════════════════════════════════════════════ */
-html.case-open, html.case-open body { overflow: hidden; }
+
 .cs-backdrop {
   position: fixed; inset: 0; z-index: 120; display: grid; place-items: stretch;
   background: rgba(4, 5, 8, 0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);

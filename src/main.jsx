@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
+import { ensureScrollable } from "./lib/scrollLock.js";
 import "./fonts.css";
 import "./index.css";
 
@@ -13,6 +14,10 @@ import "./index.css";
   root.classList.add("anim");
   try { if (sessionStorage.getItem("av-preloaded") === "1") { root.classList.add("no-pre"); dropPreloader(); } } catch { /* ignore */ }
 })();
+
+// Hard failsafes: release any scroll lock left behind by the intro.
+[2500, 6500].forEach((ms) => setTimeout(ensureScrollable, ms));
+window.addEventListener("pageshow", () => setTimeout(ensureScrollable, 300));
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
