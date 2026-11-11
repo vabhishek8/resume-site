@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { bus } from "../lib/guideBus.js";
+import { initRunPipeline } from "../lib/runPipeline.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,12 +32,19 @@ export function useSiteEffects() {
       /* ── Preloader + hero intro ───────────────────────────────────────── */
       const heroIntro = () => {
         root.classList.add("is-loaded");
-        if (reduce) return;
-        const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-        tl.to("[data-hero-line]", { y: 0, duration: 1.2, stagger: 0.08 }, 0)
-          .to("[data-hero]", { opacity: 1, y: 0, duration: 1, stagger: 0.06 }, 0.25)
-          .to("[data-hero-portrait] .portrait-frame", { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "expo.inOut" }, 0.1)
-          .from("[data-hero-portrait] img", { scale: 1.25, duration: 1.8 }, 0.1);
+        const name = document.querySelector("[data-hero-name]");
+        let shown = false;
+        const showName = () => {
+          if (shown) return;
+          shown = true;
+          if (name) name.classList.add("name-in");
+          if (!reduce) {
+            gsap.to("[data-hero]", { opacity: 1, y: 0, duration: 1, stagger: 0.07, ease: "expo.out", delay: 0.15 });
+          }
+        };
+        window.addEventListener("av:name-ready", showName, { once: true });
+        gsap.delayedCall(3.6, showName);
+        window.dispatchEvent(new Event("av:hero-intro"));
       };
 
       const pre = document.querySelector(".preloader");
@@ -65,11 +74,20 @@ export function useSiteEffects() {
         onEnter: (els) => gsap.to(els, { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.07 })
       });
 
+      // Kinetic headings: a colour wipe sweeps across, characters flip up behind it
       gsap.utils.toArray("[data-split]").forEach((h) => {
-        gsap.to(h.querySelectorAll(".line-inner"), {
-          y: 0, duration: 1.1, ease: "expo.out", stagger: 0.09,
-          scrollTrigger: { trigger: h, start: "top 85%", once: true }
-        });
+        const chars = h.querySelectorAll(".ch");
+        const wipe = h.querySelector(".wipe");
+        const tl = gsap.timeline({ scrollTrigger: { trigger: h, start: "top 85%", once: true } });
+        if (wipe) {
+          tl.fromTo(wipe, { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.45, ease: "expo.inOut" }, 0)
+            .set(wipe, { transformOrigin: "100% 50%" }, 0.45)
+            .to(wipe, { scaleX: 0, duration: 0.5, ease: "expo.inOut" }, 0.45);
+        }
+        tl.fromTo(chars,
+          { yPercent: 115, rotateX: -85, opacity: 0 },
+          { yPercent: 0, rotateX: 0, opacity: 1, duration: 0.9, ease: "expo.out", stagger: { each: 0.018 } },
+          0.3);
       });
 
       /* ── Counters ─────────────────────────────────────────────────────── */
@@ -112,43 +130,6 @@ export function useSiteEffects() {
       /* ── Responsive-only choreography ─────────────────────────────────── */
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 1024px)", () => {
-        // Persistent portrait: leaves the hero and stays as a faded fixed layer
-        // One controller computes the portrait state from scroll position, so
-        // several overlapping tweens never fight over `opacity`.
-        const fig = document.querySelector("[data-hero-portrait]");
-        const hero = document.querySelector(".hero");
-        const proj = document.getElementById("projects");
-        const contact = document.getElementById("contact");
-        const med = document.querySelector("[data-medallion]");
-        if (fig && hero && proj && contact) {
-          const cap = fig.querySelector("figcaption");
-          const clamp01 = gsap.utils.clamp(0, 1);
-          const docTop = (el) => el.getBoundingClientRect().top + window.scrollY;
-          ScrollTrigger.create({
-            start: 0, end: "max",
-            onUpdate: (self) => {
-              const y = self.scroll(), vh = window.innerHeight;
-              const h = clamp01(y / (hero.offsetHeight * 0.75));
-              const out = clamp01((y - (docTop(proj) - vh * 0.6)) / (vh * 0.5));
-              const back = clamp01((y - (docTop(contact) - vh * 0.7)) / (vh * 0.5));
-              let medHide = 0;
-              if (med) {
-                const mt = docTop(med), mb = mt + med.offsetHeight;
-                medHide = clamp01((y - (mt - vh * 0.5)) / (vh * 0.4)) * (1 - clamp01((y - (mb - vh * 0.9)) / (vh * 0.4)));
-              }
-              const opacity = gsap.utils.interpolate(1, 0.12, h) * (1 - out) * (1 - medHide) + 0.22 * back;
-              gsap.set(fig, {
-                opacity, scale: 1 - 0.14 * h, xPercent: 8 * h,
-                filter: `grayscale(${h}) contrast(${1 + 0.1 * h})`
-              });
-              if (cap) cap.style.opacity = String(1 - h);
-            }
-          });
-          return () => gsap.set(fig, { clearProps: "opacity,transform,filter" });
-        }
-      });
-
       mm.add("(min-width: 900px)", () => {
         // Medallion: pin + scrub the walkthrough
         const sec = document.querySelector("[data-medallion]");
@@ -165,6 +146,8 @@ export function useSiteEffects() {
           last = idx;
           nodes.forEach((n, i) => { n.classList.toggle("on", i <= idx); n.classList.toggle("current", i === idx); });
           steps.forEach((s, i) => s.classList.toggle("current", i === idx));
+          bus.packet = ["#8b93a3", "#c9895b", "#c9d3dd", "#f2b544", "#3cc8ff"][idx] || "#c9895b";
+          bus.medIndex = idx;
         };
         setActive(0);
         ScrollTrigger.create({
@@ -194,6 +177,15 @@ export function useSiteEffects() {
         });
       });
 
+      /* ── Contact: the section lights up as you arrive (scrubbed clip) ─── */
+      const glow = document.querySelector(".contact-light");
+      if (glow) {
+        gsap.fromTo(glow, { clipPath: "circle(0% at 82% 100%)" }, {
+          clipPath: "circle(140% at 82% 100%)", ease: "none",
+          scrollTrigger: { trigger: "#contact", start: "top 85%", end: "top 15%", scrub: 0.6 }
+        });
+      }
+
       /* ── Header hide/show + scrolled state ────────────────────────────── */
       const header = document.querySelector(".site-header");
       ScrollTrigger.create({
@@ -217,6 +209,29 @@ export function useSiteEffects() {
         });
       });
     });
+
+    /* ── Run-the-pipeline widget (lazy: wires up when first near view) ── */
+    const runRoot = document.querySelector("[data-run]");
+    if (runRoot) {
+      let stopRun = null;
+      const io2 = new IntersectionObserver(([en]) => {
+        if (en.isIntersecting && !stopRun) { stopRun = initRunPipeline(runRoot); io2.disconnect(); }
+      }, { rootMargin: "300px" });
+      io2.observe(runRoot);
+      cleanups.push(() => { io2.disconnect(); if (stopRun) stopRun(); });
+    }
+
+    /* ── Footer finale: the giant name's light follows the pointer ─────── */
+    const foot = document.querySelector("[data-footer]");
+    if (foot && !reduce) {
+      const mv = (e) => {
+        const r = foot.getBoundingClientRect();
+        foot.style.setProperty("--fx", `${((e.clientX - r.left) / r.width) * 100}%`);
+        foot.style.setProperty("--fy", `${((e.clientY - r.top) / r.height) * 100}%`);
+      };
+      foot.addEventListener("pointermove", mv);
+      cleanups.push(() => foot.removeEventListener("pointermove", mv));
+    }
 
     /* ── Scroll-spy for reduced motion (no ScrollTrigger needed) ────────── */
     if (reduce) {
