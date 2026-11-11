@@ -701,25 +701,6 @@ html.anim [data-split] .ch { opacity: 0; }
 }
 html:not(.anim) .display .wipe { display: none; }
 
-/* ═══ Data portrait layer ═════════════════════════════════════════════ */
-.portrait-layer {
-  position: fixed; z-index: 2; pointer-events: none;
-  right: -2vw; bottom: 0; height: min(86vh, 880px, 56vw); aspect-ratio: 3 / 4;
-  transition: opacity 0.4s ease;
-}
-.portrait-layer canvas {
-  display: block;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 16%), linear-gradient(to top, transparent 0%, #000 10%);
-  -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to right, transparent 0%, #000 16%), linear-gradient(to top, transparent 0%, #000 10%);
-  mask-composite: intersect;
-}
-.portrait-layer.is-static { position: absolute; top: calc(100vh - min(86vh, 880px, 56vw)); bottom: auto; }
-@media (max-width: 1023px) {
-  .portrait-layer { position: absolute; top: 56px; bottom: auto; right: 0; height: 52vh; max-height: 460px; }
-  .portrait-layer.is-static { top: 56px; }
-}
-
 /* ═══ Run the pipeline ═══════════════════════════════════════════════════ */
 .run {
   position: relative; margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line);
@@ -895,27 +876,26 @@ html.menu-open .site-header { backdrop-filter: none; -webkit-backdrop-filter: no
 }
 .case-actions { row-gap: 10px; }
 
-/* ═══ Figure layer (generated poses; fallback is the data portrait) ═══ */
+/* ═══ Figure layer (generated poses) ═════════════════════════════════ */
 .figure-layer {
-  --fig-op: 1; --fig-par: 0%;
-  position: fixed; z-index: 2; pointer-events: none; right: -2vw; bottom: 0;
-  height: min(90vh, 920px, 58vw); aspect-ratio: 3 / 4;
-  opacity: var(--fig-op); transform: translate3d(0, var(--fig-par), 0);
-  transition: opacity 0.6s ease, transform 0.2s linear, right 0.8s var(--ease);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 18%), linear-gradient(to top, transparent 0%, #000 14%);
+  --fig-op: 1; --fig-par: 0%; --fig-in: 1;
+  position: fixed; z-index: 2; pointer-events: none; right: -1vw; bottom: 0;
+  height: min(92vh, 920px, 60vw); aspect-ratio: 1493 / 2000;
+  opacity: calc(var(--fig-op) * var(--fig-in)); transform: translate3d(0, var(--fig-par), 0);
+  transition: opacity 0.8s ease, transform 0.2s linear;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 16%), linear-gradient(to top, transparent 0%, #000 12%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to right, transparent 0%, #000 18%), linear-gradient(to top, transparent 0%, #000 14%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 16%), linear-gradient(to top, transparent 0%, #000 12%);
   mask-composite: intersect;
 }
-.figure-layer.is-left { right: auto; left: 0; }
-.fig-pose { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; }
+html.anim .figure-layer:not(.is-in) { --fig-in: 0; }
+.fig-pose { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; }
 .fig-pose.is-active { opacity: 1; }
 .fig-pose img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; transform-origin: 50% 100%; }
 html.anim .fig-pose.is-active img { animation: fig-breath 6s ease-in-out infinite; }
 @keyframes fig-breath { 50% { transform: scale(1.004) translateY(-0.2%); } }
 @media (max-width: 1023px) {
-  .figure-layer { position: absolute; top: 56px; bottom: auto; right: 0; height: 52vh; max-height: 460px; opacity: 0.4; }
-  .figure-layer.is-left { left: auto; right: 0; }
+  .figure-layer { position: absolute; top: 48px; bottom: auto; right: 0; height: 54vh; max-height: 480px; --fig-op: 0.5 !important; transform: none; }
 }
 
 /* Mobile hero legibility: scrim between the portrait and the hero copy */

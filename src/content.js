@@ -315,17 +315,17 @@ export const CHAPTERS = [
   { sel: "#contact", stage: "Serve", label: "Contact" }
 ];
 
-// Figure layer. Drop generated poses into /public/img/figure/ and set the
-// paths here (WebP or PNG, black or transparent background, ~2000px tall).
-// Any pose left null falls back to "hero"; if "hero" is null the halftone
-// data portrait is used. sectionPose maps chapter label to pose key.
+// Figure layer: generated portrait poses (cut out, colour-matched, upscaled),
+// served as transparent WebP at FIGURE.widths. Paths are bases: "<base>-<w>.webp".
 export const FIGURE = {
+  widths: [480, 720, 960, 1280],
   poses: {
-    hero: null,     // e.g. "/img/figure/hero.webp"
-    about: null,    // e.g. "/img/figure/about.webp"  (shown on the left)
-    work: null,     // e.g. "/img/figure/work.webp"
-    contact: null   // e.g. "/img/figure/contact.webp"
+    hero: "/img/figure/hero",       // chest-up, facing camera (IMG_1810)
+    about: "/img/figure/about",     // three-quarter, hands in pockets
+    work: "/img/figure/work",       // arms crossed
+    contact: "/img/figure/contact"  // buttoning the blazer
   },
+  alt: "Portrait of Abhishek Vadlamudi",
   sectionPose: {
     Hello: "hero", Profile: "about", Approach: "work", Capabilities: "hero",
     "Track record": "hero", Proof: "work", Foundations: "hero", Contact: "contact"
