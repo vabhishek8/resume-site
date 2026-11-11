@@ -263,7 +263,7 @@ export function startPortrait(wrap, canvas) {
   assemble = 0;
   const onReady = () => setTimeout(playAssemble, 250);
   window.addEventListener("av:name-ready", onReady);
-  const fallback = setTimeout(playAssemble, 4200);
+  const fallback = setTimeout(playAssemble, window.__avNameReady ? 150 : 4200);
   raf = requestAnimationFrame(frame);
 
   let rT;
