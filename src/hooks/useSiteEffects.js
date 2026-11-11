@@ -37,6 +37,7 @@ export function useSiteEffects() {
         const showName = () => {
           if (shown) return;
           shown = true;
+          window.__avNameReady = true;
           if (name) name.classList.add("name-in");
           if (!reduce) {
             gsap.to("[data-hero]", { opacity: 1, y: 0, duration: 1, stagger: 0.07, ease: "expo.out", delay: 0.15 });
