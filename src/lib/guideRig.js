@@ -1,20 +1,24 @@
 import { gsap } from "gsap";
 import { bus } from "./guideBus.js";
 
-// Rig for the illustrated guide. All motion is computed into a plain state
-// object and written to SVG transform attributes once per frame, so there is
-// no CSS-transform/SVG-origin ambiguity and nothing that needs inline script.
+// Rig for the illustrated guide (waist-up, 3/4 view, viewBox 240x300).
+// Pose parameters are tweened with eased GSAP tweens (no linear motion);
+// per-frame secondary motion (breathing, blink, look-at, hair lag, lean,
+// squash and stretch) is layered on top and written to SVG transform
+// attributes once per frame. No inline script, no CSS-transform/SVG-origin
+// ambiguity: every rotation names its pivot explicitly.
 
+// Angles in degrees; 0 = arm hanging straight down. hL/hR: 0 fist, 1 open, 2 point.
 const POSES = {
-  idle:   { aLU: -8,  aLF: -6,  aRU: 8,    aRF: 6,   lap: 0, pk: 0, cap: 0, wave: 0 },
-  laptop: { aLU: -6,  aLF: -84, aRU: 6,    aRF: 84,  lap: 1, pk: 0, cap: 0, wave: 0 },
-  carry:  { aLU: -10, aLF: -105, aRU: 10,  aRF: 105,  lap: 0, pk: 1, cap: 0, wave: 0 },
-  think:  { aLU: -8,  aLF: -6,  aRU: -120, aRF: -55,  lap: 0, pk: 0, cap: 0, wave: 0 },
-  point:  { aLU: 100, aLF: 12,  aRU: 10,   aRF: 12,  lap: 0, pk: 0, cap: 0, wave: 0 },
-  cap:    { aLU: -8,  aLF: -6,  aRU: 8,    aRF: 6,   lap: 0, pk: 0, cap: 1, wave: 0 },
-  wave:   { aLU: -8,  aLF: -6,  aRU: -152, aRF: -18, lap: 0, pk: 0, cap: 0, wave: 1 },
-  cheer:  { aLU: 150, aLF: 22,  aRU: -150, aRF: -22, lap: 0, pk: 0, cap: 0, wave: 0 },
-  walk:   { aLU: -6,  aLF: -10, aRU: 6,    aRF: 10,  lap: 0, pk: 0, cap: 0, wave: 0 }
+  idle:   { aLU: 4,   aLF: 6,    aRU: -4,   aRF: -6,  hL: 0, hR: 0, lap: 0, pk: 0, cap: 0, wave: 0 },
+  laptop: { aLU: 26,  aLF: -100, aRU: -26,  aRF: 100,  hL: 0, hR: 0, lap: 1, pk: 0, cap: 0, wave: 0 },
+  carry:  { aLU: -6,  aLF: -142, aRU: 6,    aRF: 142, hL: 0, hR: 0, lap: 0, pk: 1, cap: 0, wave: 0 },
+  think:  { aLU: 4,   aLF: 6,    aRU: -136, aRF: -84, hL: 0, hR: 2, lap: 0, pk: 0, cap: 0, wave: 0 },
+  point:  { aLU: 78,  aLF: 16,   aRU: -4,   aRF: -6,  hL: 2, hR: 0, lap: 0, pk: 0, cap: 0, wave: 0 },
+  cap:    { aLU: 4,   aLF: 6,    aRU: -4,   aRF: -6,  hL: 0, hR: 0, lap: 0, pk: 0, cap: 1, wave: 0 },
+  wave:   { aLU: 4,   aLF: 6,    aRU: -148, aRF: -26, hL: 0, hR: 1, lap: 0, pk: 0, cap: 0, wave: 1 },
+  cheer:  { aLU: 148, aLF: 22,   aRU: -148, aRF: -22, hL: 1, hR: 1, lap: 0, pk: 0, cap: 0, wave: 0 },
+  glide:  { aLU: 8,   aLF: 10,   aRU: -8,   aRF: -10, hL: 0, hR: 0, lap: 0, pk: 0, cap: 0, wave: 0 }
 };
 
 const SECTIONS = [
@@ -22,16 +26,19 @@ const SECTIONS = [
   { sel: "#about",           mode: "about",      pose: "idle",   say: "I build the layer under the dashboards." },
   { sel: "[data-medallion]", mode: "medallion",  pose: "carry",  say: "Hit run. I'll carry the data." },
   { sel: "#skills",          mode: "skills",     pose: "think",  say: "Gold dot means production." },
-  { sel: "#experience",      mode: "experience", pose: "walk",   say: "Walking the timeline with you." },
+  { sel: "#experience",      mode: "experience", pose: "glide",  say: "Following the timeline with you." },
   { sel: "#projects",        mode: "projects",   pose: "point",  say: "These pipelines run daily." },
   { sel: "#education",       mode: "education",  pose: "cap",    say: "The foundations." },
   { sel: "#contact",         mode: "contact",    pose: "wave",   say: "Let's build something." }
 ];
 const FOOTER = { mode: "footer", pose: "wave", say: "Thanks for scrolling!" };
 
-const MOUTH_SMILE = "M100 137 Q110 143 120 137 Q110 140 100 137 Z";
-const MOUTH_OPEN = "M99 135 Q110 148 121 135 Q110 139 99 135 Z";
+const MOUTH_SMILE = "M108 133 C113 136 120 136 125 132 C121 138 112 139 108 133 Z";
+const MOUTH_OPEN = "M107 132 C113 135 121 135 126 131 C123 141 111 142 107 132 Z";
 
+// Box is the SVG viewBox (-80 -40 400 340); the figure itself spans x 0..240, y 0..300.
+const OX = 80, OY = 40;
+const VB_W = 400, VB_H = 340, CX = 124;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const shade = (hex, f) => {
@@ -42,55 +49,61 @@ const shade = (hex, f) => {
 
 export const POSE_NAMES = Object.keys(POSES);
 
-// Builds a renderer bound to one SVG. Exported so the static (reduced motion)
-// pose and tests can draw a frame without the live loop.
+// Renderer bound to one SVG; also used for the static (reduced motion) frame.
 export function makeRenderer(svg) {
   const $ = (k) => svg.querySelector(`[data-g="${k}"]`);
   const el = {
-    root: $("root"), torso: $("torso"), head: $("head"),
+    root: $("root"), torso: $("torso"), head: $("head"), features: $("features"), hair: $("hair"),
     eyeL: $("eye-l"), eyeR: $("eye-r"), pupilL: $("pupil-l"), pupilR: $("pupil-r"),
-    brows: $("brows"), mouth: $("mouth"), faceLight: $("face-light"),
+    brows: $("brows"), mouth: $("mouth"),
     aLU: $("arm-l-u"), aLF: $("arm-l-f"), aRU: $("arm-r-u"), aRF: $("arm-r-f"),
-    legL: $("leg-l"), legR: $("leg-r"),
+    hand: {
+      l: [$("hand-l-fist"), $("hand-l-open"), $("hand-l-point")],
+      r: [$("hand-r-fist"), $("hand-r-open"), $("hand-r-point")]
+    },
     laptop: $("laptop"), laptopGlow: $("laptop-glow"),
     packet: $("packet"), pkTop: $("pk-top"), pkL: $("pk-left"), pkR: $("pk-right"),
     cap: $("cap"), tassel: $("tassel")
   };
   let packetHex = "";
+  let mouthOpen = null;
   const setT = (node, v) => node && node.setAttribute("transform", v);
-  return function draw(P, S, t) {
-    // breathing, bob, walk cycle
-    const breath = 1 + Math.sin(t * 2.2) * 0.012;
-    const bob = Math.sin(t * 2.2) * 1.1;
-    const w = S.walk;
-    const legSwing = Math.sin(t * 9) * 24 * w;
-    const walkBob = -Math.abs(Math.sin(t * 9)) * 3 * w;
-    const wave = P.wave ? Math.sin(t * 11) * 24 * P.wave : 0;
+  const setHand = (list, v) => list.forEach((n, i) => n && n.setAttribute("opacity", clamp(1 - Math.abs(v - i), 0, 1).toFixed(2)));
 
-    setT(el.root, `translate(0 ${(bob * 0.4 + walkBob + S.hop).toFixed(2)})`);
-    setT(el.torso, `translate(110 250) scale(1 ${breath.toFixed(4)}) translate(-110 -250)`);
-    setT(el.head, `translate(${S.headX.toFixed(2)} ${(bob * 0.6).toFixed(2)}) rotate(${S.headR.toFixed(2)} 110 150)`);
-    setT(el.eyeL, `translate(91 98) scale(1 ${S.lid.toFixed(3)}) translate(-91 -98)`);
-    setT(el.eyeR, `translate(129 98) scale(1 ${S.lid.toFixed(3)}) translate(-129 -98)`);
-    setT(el.pupilL, `translate(${S.eyeX.toFixed(2)} ${S.eyeY.toFixed(2)})`);
+  return function draw(P, S, t) {
+    const breath = Math.sin(t * 1.9);                 // ~0.3 Hz chest rise
+    const chest = 1 + breath * 0.004;                 // ~0.6px at chest height
+    const lift = breath * 0.7;                        // head/arms ride the breath
+    const sq = S.sq;                                  // squash & stretch, volume-preserving
+    const sx = 1 / Math.sqrt(sq);
+    const wave = P.wave ? Math.sin(t * 9.5) * 18 * P.wave : 0;
+
+    setT(el.root, `translate(${CX} 300) rotate(${S.lean.toFixed(2)}) scale(${sx.toFixed(4)} ${sq.toFixed(4)}) translate(${-CX} ${(-300 + S.hop).toFixed(2)})`);
+    setT(el.torso, `translate(0 300) scale(1 ${chest.toFixed(4)}) translate(0 -300)`);
+    setT(el.head, `translate(0 ${(-lift).toFixed(2)}) rotate(${S.headR.toFixed(2)} ${CX} 150)`);
+    setT(el.features, `translate(${S.headX.toFixed(2)} ${(S.headY * 0.6).toFixed(2)})`);
+    setT(el.hair, `translate(${(S.headX * 0.35).toFixed(2)} 0) rotate(${(S.hairLag).toFixed(2)} ${CX} 92)`);
+    setT(el.eyeR, `translate(137 94) scale(1 ${S.lid.toFixed(3)}) translate(-137 -94)`);
+    setT(el.eyeL, `translate(106 93) scale(1 ${S.lid.toFixed(3)}) translate(-106 -93)`);
     setT(el.pupilR, `translate(${S.eyeX.toFixed(2)} ${S.eyeY.toFixed(2)})`);
+    setT(el.pupilL, `translate(${(S.eyeX * 0.85).toFixed(2)} ${S.eyeY.toFixed(2)})`);
     setT(el.brows, `translate(0 ${S.brow.toFixed(2)})`);
-    setT(el.aLU, `rotate(${(P.aLU - legSwing * 0.7).toFixed(2)})`);
+
+    setT(el.aLU, `translate(0 ${(-lift * 0.6).toFixed(2)}) rotate(${P.aLU.toFixed(2)})`);
     setT(el.aLF, `rotate(${P.aLF.toFixed(2)})`);
-    setT(el.aRU, `rotate(${(P.aRU + legSwing * 0.7).toFixed(2)})`);
+    setT(el.aRU, `translate(0 ${(-lift * 0.6).toFixed(2)}) rotate(${P.aRU.toFixed(2)})`);
     setT(el.aRF, `rotate(${(P.aRF + wave).toFixed(2)})`);
-    setT(el.legL, `rotate(${legSwing.toFixed(2)})`);
-    setT(el.legR, `rotate(${(-legSwing).toFixed(2)})`);
+    setHand(el.hand.l, P.hL);
+    setHand(el.hand.r, P.hR);
 
     el.laptop.setAttribute("opacity", P.lap.toFixed(3));
-    setT(el.laptop, `translate(110 200) scale(${(0.6 + 0.4 * P.lap).toFixed(3)})`);
-    el.laptopGlow.setAttribute("opacity", (0.2 + bus.pulse * 0.7).toFixed(3));
-    el.faceLight.setAttribute("opacity", (P.lap * (0.55 + bus.pulse * 0.45)).toFixed(3));
+    setT(el.laptop, `translate(125 ${(252 + (1 - P.lap) * 24 - lift * 0.5).toFixed(2)}) scale(${(0.7 + 0.3 * P.lap).toFixed(3)})`);
+    el.laptopGlow.setAttribute("opacity", (0.22 + bus.pulse * 0.7).toFixed(3));
     el.packet.setAttribute("opacity", P.pk.toFixed(3));
-    setT(el.packet, `translate(110 ${(172 + Math.sin(t * 3) * 2).toFixed(2)}) scale(${(0.5 + 0.8 * P.pk).toFixed(3)}) rotate(${(Math.sin(t * 1.5) * 6).toFixed(2)})`);
+    setT(el.packet, `translate(125 ${(180 + Math.sin(t * 2.6) * 1.6).toFixed(2)}) scale(${(0.55 + 0.6 * P.pk).toFixed(3)}) rotate(${(Math.sin(t * 1.3) * 5).toFixed(2)})`);
     el.cap.setAttribute("opacity", P.cap.toFixed(3));
-    setT(el.cap, `translate(0 ${((1 - P.cap) * -26).toFixed(2)})`);
-    setT(el.tassel, `rotate(${(Math.sin(t * 2.4) * 7).toFixed(2)} 110 32)`);
+    setT(el.cap, `translate(0 ${((1 - P.cap) * -30).toFixed(2)}) rotate(${((1 - P.cap) * -8).toFixed(2)} 126 20)`);
+    setT(el.tassel, `rotate(${(Math.sin(t * 2.1) * 6 - S.headR * 0.8).toFixed(2)} 126 20)`);
 
     if (bus.packet !== packetHex) {
       packetHex = bus.packet;
@@ -98,15 +111,16 @@ export function makeRenderer(svg) {
       el.pkL.setAttribute("fill", packetHex);
       el.pkR.setAttribute("fill", shade(packetHex, 0.75));
     }
-    el.mouth.setAttribute("d", S.open > 0.5 ? MOUTH_OPEN : MOUTH_SMILE);
-  
+    const open = S.open > 0.5;
+    if (open !== mouthOpen) { mouthOpen = open; el.mouth.setAttribute("d", open ? MOUTH_OPEN : MOUTH_SMILE); }
   };
 }
 
+const NEUTRAL = { eyeX: 0, eyeY: 0, headR: -2, headX: 0, headY: 0, hairLag: 0, lid: 1, brow: 0, hop: 0, sq: 1, lean: 0, open: 0 };
+
 export function drawStaticPose(svg, name) {
-  const draw = makeRenderer(svg);
   bus.packet = bus.packet || "#c9895b";
-  draw({ ...POSES[name] }, { eyeX: 0, eyeY: 0, headR: 0, headX: 0, lid: 1, brow: 0, hop: 0, walk: 0, open: 0 }, 0);
+  makeRenderer(svg)({ ...POSES[name] }, { ...NEUTRAL }, 0);
 }
 
 export function startGuide(wrap) {
@@ -115,13 +129,11 @@ export function startGuide(wrap) {
   const draw = makeRenderer(svg);
   const bubble = wrap.querySelector(".guide-bubble");
   const bubbleText = bubble.querySelector("span");
-
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isDesk = () => window.innerWidth >= 1024;
 
-  // Pose parameters (tweened) + live dynamics (per frame)
   const P = { ...POSES.laptop };
-  const S = { x: 0, y: 0, s: 1, eyeX: 0, eyeY: 0, headR: 0, headX: 0, lid: 1, brow: 0, hop: 0, walk: 0, open: 0 };
+  const S = { x: 0, y: 0, s: 1, fade: 1, ...NEUTRAL, hairV: 0 };
   let pointer = { x: window.innerWidth * 0.4, y: window.innerHeight * 0.4 };
   let focusEl = null;
   let mode = "hero";
@@ -135,16 +147,13 @@ export function startGuide(wrap) {
   function placement() {
     const W = window.innerWidth, H = window.innerHeight;
     if (!isDesk()) {
-      if (mode === "hero") {
-        const s = 0.5;
-        return { x: W - 220 * s - 8, y: 70, s };
-      }
-      const s = 0.34;
-      return { x: W - 220 * s - 6, y: H - 312 * s - 8, s };
+      if (mode === "hero") { const s = 0.5; return { x: W - (240 + OX) * s - 6, y: 66 - OY * s, s }; }
+      const s = 0.36;
+      return { x: W - (240 + OX) * s - 2, y: H - (300 + OY) * s + 2, s };
     }
     if (mode === "hero") {
-      const s = clamp((H * 0.62) / 320, 0.85, 1.45);
-      return { x: W * 0.8 - 110 * s, y: H * 0.88 - 306 * s, s };
+      const s = clamp((H * 0.62) / VB_H, 0.95, 1.7);
+      return { x: W * 0.8 - (CX + OX) * s, y: H - 74 - (300 + OY) * s, s };
     }
     if (mode === "experience") {
       const rail = document.querySelector(".tl-rail");
@@ -152,25 +161,23 @@ export function startGuide(wrap) {
       if (rail && fill) {
         const r = rail.getBoundingClientRect();
         const f = fill.getBoundingClientRect();
-        const s = 0.4;
-        const tip = clamp(f.bottom, H * 0.3, H * 0.9);
-        return { x: r.left - 110 * s, y: tip - 300 * s, s };
+        const s = 0.34;
+        const tip = clamp(f.bottom, H * 0.3, H * 0.86);
+        return { x: r.left - (CX + OX) * s, y: tip - (150 + OY) * s, s };
       }
     }
     if (mode === "medallion") {
-      // stand on the active node of the pipeline diagram, carrying the packet
       const n = document.querySelectorAll("[data-med-node]")[bus.medIndex || 0];
       if (n) {
         const r = n.getBoundingClientRect();
         if (r.width > 0 && r.top > 80 && r.top < H) {
           const s = 0.3;
-          return { x: r.left + r.width / 2 - 110 * s, y: r.top - 18 - 300 * s, s };
+          return { x: r.left + r.width / 2 - (CX + OX) * s, y: r.top - 12 - (300 + OY) * s, s };
         }
       }
     }
-    const s = mode === "projects" ? 0.36 : 0.38;
-    const y = mode === "projects" ? H * 0.58 - 160 * s : H - 312 * s - 10;
-    return { x: W - 220 * s + (mode === "projects" ? 4 : -6), y, s };
+    const s = 0.44;
+    return { x: W - (240 + OX) * s + 6, y: H - (300 + OY) * s + 4, s };
   }
 
   function say(text, ms = 3200) {
@@ -183,37 +190,50 @@ export function startGuide(wrap) {
     bubbleTimer = setTimeout(() => bubble.classList.remove("show"), ms);
   }
 
-  function setPose(name, dur = 0.7) {
+  // Pose-to-pose with anticipation (squash), overshoot (back ease) and
+  // overlapping action (forearms and hands settle after the upper arms).
+  function setPose(name, dur = 0.65) {
     poseName = name;
-    gsap.to(P, { ...POSES[name], duration: dur, ease: "back.out(1.4)", overwrite: true });
+    const tgt = POSES[name];
+    const upper = { aLU: tgt.aLU, aRU: tgt.aRU, lap: tgt.lap, pk: tgt.pk, cap: tgt.cap, wave: tgt.wave };
+    const lower = { aLF: tgt.aLF, aRF: tgt.aRF, hL: tgt.hL, hR: tgt.hR };
+    gsap.to(P, { ...upper, duration: dur, ease: "back.out(1.5)", overwrite: "auto" });
+    gsap.to(P, { ...lower, duration: dur * 1.1, delay: dur * 0.12, ease: "back.out(2)", overwrite: "auto" });
+    pop();
   }
 
-  function hop(h = 10) {
-    gsap.fromTo(S, { hop: 0 }, { hop: -h, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1, overwrite: "auto" });
+  function pop(strength = 1) {
+    gsap.timeline()
+      .to(S, { sq: 1 - 0.035 * strength, duration: 0.11, ease: "power2.in" })
+      .to(S, { sq: 1 + 0.03 * strength, hop: -5 * strength, duration: 0.16, ease: "power2.out" })
+      .to(S, { sq: 1, hop: 0, duration: 0.42, ease: "back.out(2.2)" });
   }
 
+  let blinkCall = null;
   function blink() {
-    gsap.to(S, { lid: 0.08, duration: 0.07, yoyo: true, repeat: 1, ease: "power1.in" });
-    gsap.delayedCall(2.4 + Math.random() * 3.2, blink);
+    const twice = Math.random() < 0.2;
+    const tl = gsap.timeline();
+    tl.to(S, { lid: 0.06, duration: 0.06, ease: "power2.in" }).to(S, { lid: 1, duration: 0.11, ease: "power2.out" });
+    if (twice) tl.to(S, { lid: 0.06, duration: 0.06, ease: "power2.in", delay: 0.08 }).to(S, { lid: 1, duration: 0.11, ease: "power2.out" });
+    blinkCall = gsap.delayedCall(2 + Math.random() * 4, blink);
   }
 
-  // Reactions available to other modules (pipeline runner, CTAs)
   bus.react = (kind) => {
     if (reduce) return;
     if (kind === "cheer") {
       override = "cheer";
-      setPose("cheer", 0.45);
-      hop(14);
-      gsap.to(S, { open: 1, brow: -3, duration: 0.2 });
+      setPose("cheer", 0.5);
+      pop(1.6);
+      gsap.to(S, { open: 1, brow: -2.5, duration: 0.2, ease: "power2.out" });
       say("Run complete. Bad rows quarantined.", 2600);
-      gsap.delayedCall(1.6, () => {
+      gsap.delayedCall(1.7, () => {
         override = null;
-        gsap.to(S, { open: 0, brow: 0, duration: 0.3 });
+        gsap.to(S, { open: 0, brow: 0, duration: 0.35, ease: "power2.out" });
         setPose(currentSection().pose);
       });
     } else if (kind === "carry") {
       override = "carry";
-      setPose("carry", 0.4);
+      setPose("carry", 0.45);
     } else if (kind === "release") {
       override = null;
       setPose(currentSection().pose);
@@ -236,7 +256,6 @@ export function startGuide(wrap) {
     if (override) return;
     if (sec.pose !== poseName) setPose(sec.pose);
     if (introDone) say(sec.say);
-    hop(6);
   }
 
   const render = (t) => draw(P, S, t);
@@ -257,15 +276,13 @@ export function startGuide(wrap) {
   }
 
   /* ── Live loop ─────────────────────────────────────────────────────────── */
-  const first = placement();
-  Object.assign(S, first);
+  Object.assign(S, placement());
   let lastSec = null;
   let frame = 0;
+  let prevHeadR = S.headR;
 
   const tick = (time) => {
-    const t = time;
     frame++;
-    // section + velocity
     const sy = window.scrollY;
     vel = vel * 0.85 + (sy - lastScroll) * 0.15 * 60;
     lastScroll = sy;
@@ -274,56 +291,56 @@ export function startGuide(wrap) {
       if (sec !== lastSec) { lastSec = sec; onSectionChange(sec); }
     }
 
-    // placement (eased follow)
+    // placement: damped follow, with a lean into the direction of travel
     const tgt = placement();
-    const k = mode === "experience" ? 0.22 : 0.09;
-    S.x += (tgt.x - S.x) * k;
-    S.y += (tgt.y - S.y) * k;
-    S.s += (tgt.s - S.s) * 0.09;
+    const k = mode === "experience" || mode === "medallion" ? 0.16 : 0.085;
+    const dx = (tgt.x - S.x) * k, dy = (tgt.y - S.y) * k;
+    S.x += dx; S.y += dy;
+    S.s += (tgt.s - S.s) * 0.085;
+    const travel = clamp(dx * 0.35 + (mode === "experience" ? vel * 0.004 : 0), -7, 7);
+    S.lean += (travel - S.lean) * 0.12;
     wrap.style.setProperty("--s", S.s.toFixed(4));
     wrap.style.transform = `translate3d(${S.x.toFixed(1)}px, ${S.y.toFixed(1)}px, 0)`;
-    wrap.classList.toggle("left-side", S.x + 110 * S.s < window.innerWidth / 2);
+    wrap.classList.toggle("left-side", S.x + (CX + OX) * S.s < window.innerWidth / 2);
     const docked = mode !== "hero" && mode !== "experience" && mode !== "medallion";
     const fadeT = docked && Math.abs(vel) > 120 ? 0.35 : 1;
-    S.fade = (S.fade ?? 1) + (fadeT - (S.fade ?? 1)) * 0.12;
+    S.fade += (fadeT - S.fade) * 0.12;
     wrap.style.opacity = S.fade.toFixed(3);
 
-    // walk when travelling along the timeline (or moving far)
-    const travelling = Math.abs(tgt.y - S.y) > 30 || Math.abs(tgt.x - S.x) > 30;
-    const walkTarget = mode === "experience" ? clamp(Math.abs(vel) / 500, 0, 1) : travelling ? 0.6 : 0;
-    S.walk += (walkTarget - S.walk) * 0.1;
-
-    // look-at: pointer, or a hovered CTA
+    // look-at (pointer or hovered CTA), clamped and smoothed
     let tx = pointer.x, ty = pointer.y;
-    if (focusEl) {
-      const r = focusEl.getBoundingClientRect();
-      tx = r.left + r.width / 2; ty = r.top + r.height / 2;
-    }
-    const hx = S.x + 110 * S.s, hy = S.y + 100 * S.s;
-    const dx = tx - hx, dy = ty - hy;
-    S.eyeX += (clamp(dx / 260, -1, 1) * 3.2 - S.eyeX) * 0.2;
-    S.eyeY += (clamp(dy / 260, -1, 1) * 2.2 - S.eyeY) * 0.2;
-    S.headR += (clamp(dx / 700, -1, 1) * 7 - S.headR) * 0.08;
-    S.headX += (clamp(dx / 600, -1, 1) * 2 - S.headX) * 0.08;
+    if (focusEl) { const r = focusEl.getBoundingClientRect(); tx = r.left + r.width / 2; ty = r.top + r.height / 2; }
+    const hx = S.x + (CX + OX) * S.s, hy = S.y + (95 + OY) * S.s;
+    const nx = clamp((tx - hx) / 420, -1, 1), ny = clamp((ty - hy) / 360, -1, 1);
+    S.eyeX += (nx * 2.4 - S.eyeX) * 0.18;
+    S.eyeY += (ny * 1.6 - S.eyeY) * 0.18;
+    S.headR += (nx * 5 - 2 - S.headR) * 0.06;
+    S.headX += (nx * 2.6 - S.headX) * 0.07;
+    S.headY += (ny * 1.6 - S.headY) * 0.07;
 
-    // laptop sink for the hero stream
-    bus.laptop.x = S.x + 110 * S.s;
-    bus.laptop.y = S.y + 186 * S.s;
+    // hair: spring that lags the head (overlapping action)
+    const dHead = S.headR - prevHeadR;
+    prevHeadR = S.headR;
+    S.hairV += (-dHead * 1.8 - S.hairLag) * 0.12;
+    S.hairV *= 0.8;
+    S.hairLag += S.hairV;
+
+    bus.laptop.x = S.x + (125 + OX) * S.s;
+    bus.laptop.y = S.y + (236 + OY) * S.s;
     bus.laptop.active = mode === "hero" && P.lap > 0.6;
     bus.pulse *= 0.94;
 
-    render(t);
+    render(time);
   };
   gsap.ticker.add(tick);
-  gsap.delayedCall(2, blink);
+  blinkCall = gsap.delayedCall(1.6, blink);
 
-  // Greeting: wave once the hero name has assembled (or after a fallback)
   const greet = () => {
     if (introDone) return;
     introDone = true;
-    setPose("wave", 0.5);
+    setPose("wave", 0.55);
     say("Hi, I'm Abhishek.", 2600);
-    gsap.delayedCall(1.9, () => { if (!override && mode === "hero") setPose("laptop"); else if (!override) setPose(currentSection().pose); });
+    gsap.delayedCall(2, () => { if (!override) setPose(currentSection().pose); });
   };
   window.addEventListener("av:name-ready", greet);
   const greetFallback = gsap.delayedCall(4.5, greet);
@@ -334,10 +351,10 @@ export function startGuide(wrap) {
     if (b === focusEl) return;
     focusEl = b;
     if (b) {
-      gsap.to(S, { brow: -3.5, open: 1, duration: 0.2 });
-      hop(9);
+      gsap.to(S, { brow: -2.5, open: 1, duration: 0.22, ease: "power2.out" });
+      pop(0.7);
     } else {
-      gsap.to(S, { brow: 0, open: 0, duration: 0.3 });
+      gsap.to(S, { brow: 0, open: 0, duration: 0.35, ease: "power2.out" });
     }
   };
   window.addEventListener("pointermove", onMove, { passive: true });
@@ -346,8 +363,8 @@ export function startGuide(wrap) {
   return () => {
     gsap.ticker.remove(tick);
     greetFallback.kill();
+    if (blinkCall) blinkCall.kill();
     gsap.killTweensOf(S); gsap.killTweensOf(P);
-    gsap.killTweensOf(blink);
     window.removeEventListener("av:name-ready", greet);
     window.removeEventListener("pointermove", onMove);
     document.removeEventListener("pointerover", onOver);
