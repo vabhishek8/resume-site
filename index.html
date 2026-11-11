@@ -16,11 +16,33 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/img/favicon-512.png">
 <link rel="apple-touch-icon" href="/img/favicon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Abhishek Vadlamudi",
+  "jobTitle": "Senior Business Intelligence Engineer",
+  "worksFor": { "@type": "Organization", "name": "Unisys" },
+  "address": { "@type": "PostalAddress", "addressLocality": "Sydney", "addressRegion": "NSW", "addressCountry": "AU" },
+  "url": "https://abhishekvadlamudi.com/",
+  "sameAs": ["https://linkedin.com/in/abhishekvadlamudi", "https://github.com/vabhishek8"],
+  "knowsAbout": ["SQL Server", "SSIS", "Azure Databricks", "PySpark", "Azure Data Lake Storage", "Azure Synapse Analytics", "Azure DevOps", "Power BI"]
+}
+</script>
 </head>
 <body>
+<!-- Static so it paints before the JS bundle; the app animates and removes it. -->
+<div class="preloader" aria-hidden="true">
+  <div class="pre-inner">
+    <p class="pre-line"><span>bronze</span><span class="pre-ok">landed</span></p>
+    <p class="pre-line"><span>silver</span><span class="pre-ok">quality-gated</span></p>
+    <p class="pre-line"><span>gold</span><span class="pre-ok">served</span></p>
+    <div class="pre-bar"><span></span></div>
+    <p class="pre-count"><span data-pre-count>000</span>%</p>
+  </div>
+</div>
 <div id="root"></div>
 <script type="module" src="/src/main.jsx"></script>
 </body>
