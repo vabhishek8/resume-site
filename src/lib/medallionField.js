@@ -1,23 +1,27 @@
 // Hero signature: a 2D canvas particle field that behaves like a medallion
-// pipeline. Particles enter left as noisy "raw" records (bronze), pass a
-// quality gate where a few are rejected (they flash red and drop out), get
-// aligned into lanes (silver), then converge into tight gold streams.
-// No dependencies. Pauses off-screen / hidden tab. Static frame for
-// prefers-reduced-motion.
+// pipeline. On first load the particles assemble into the name, hand over to
+// the real heading, then stream left to right: raw records (bronze) pass a
+// quality gate where a few are rejected, get aligned into lanes (silver), and
+// converge into gold streams that flow into the guide's laptop.
+// No dependencies. Pauses off-screen / hidden tab. DPR capped at 2.
+// Static frame for prefers-reduced-motion.
+
+import { bus } from "./guideBus.js";
 
 const COLORS = {
   bronze: [201, 137, 91],
   silver: [201, 211, 221],
   gold: [242, 181, 68],
   reject: [255, 84, 104],
-  accent: [60, 200, 255]
+  ink: [236, 234, 227]
 };
 
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const mix = (c1, c2, t) => [lerp(c1[0], c2[0], t), lerp(c1[1], c2[1], t), lerp(c1[2], c2[2], t)];
+const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
-export function startMedallionField(canvas) {
+export function startMedallionField(canvas, nameEl) {
   if (!canvas || !canvas.getContext) return () => {};
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
@@ -26,8 +30,11 @@ export function startMedallionField(canvas) {
   let W = 0, H = 0, dpr = 1, particles = [], lanes = [], streams = [];
   let raf = 0, running = false, visible = true;
   const mouse = { x: -9999, y: -9999, active: false };
+  let GATE_B = 0.24, GATE_S = 0.42, GATE_G = 0.6;
 
-  const GATE_B = 0.3333, GATE_S = 0.58, GATE_G = 0.80;
+  // intro state
+  let intro = null;          // { pts: [...], start }
+  let flowAlpha = 1;
 
   function layout() {
     const rect = canvas.getBoundingClientRect();
@@ -38,20 +45,23 @@ export function startMedallionField(canvas) {
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const laneCount = W < 700 ? 5 : 9;
+    const narrow = W < 700;
+    GATE_B = narrow ? 0.3 : 0.24;
+    GATE_S = narrow ? 0.55 : 0.42;
+    GATE_G = narrow ? 0.78 : 0.6;
+    const laneCount = narrow ? 5 : 9;
     lanes = Array.from({ length: laneCount }, (_, i) => H * (0.18 + (0.64 * i) / (laneCount - 1)));
     const cy = H * 0.56;
-    streams = [cy - H * 0.07, cy, cy + H * 0.07];
+    streams = [cy - H * 0.06, cy, cy + H * 0.06];
 
-    const target = clamp(Math.round((W * H) / 5200), 70, W < 700 ? 110 : 340);
+    const target = clamp(Math.round((W * H) / 5200), 70, narrow ? 110 : 320);
     particles = Array.from({ length: target }, () => spawn(true));
   }
 
   function spawn(anywhere) {
-    const y = H * (0.08 + Math.random() * 0.84);
     return {
       x: anywhere ? Math.random() * W : -10 - Math.random() * W * 0.2,
-      y,
+      y: H * (0.08 + Math.random() * 0.84),
       vy: 0,
       speed: 0.55 + Math.random() * 0.9,
       phase: Math.random() * Math.PI * 2,
@@ -65,48 +75,54 @@ export function startMedallionField(canvas) {
     };
   }
 
+  function sink() {
+    if (!bus.laptop.active) return null;
+    const r = canvas.getBoundingClientRect();
+    const x = bus.laptop.x - r.left, y = bus.laptop.y - r.top;
+    if (x < W * 0.62 || x > W + 40 || y < 0 || y > H) return null;
+    return { x, y };
+  }
+
   function step(t) {
+    const sk = sink();
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       const u = p.x / W;
-      // speed ramps up as data gets cleaner
       const v = p.speed * (u < GATE_B ? 1 : u < GATE_S ? 1.25 : 1.6);
       p.x += v;
 
       if (p.rejected) {
-        p.vy += 0.08;
-        p.y += p.vy;
-        p.x -= v * 0.6;
-        p.life -= 0.02;
+        p.vy += 0.08; p.y += p.vy; p.x -= v * 0.6; p.life -= 0.02;
       } else if (u < GATE_B) {
-        // raw: noisy brownian wander
-        p.vy += (Math.sin(t * 0.002 + p.phase) * 0.06) + (Math.random() - 0.5) * 0.18;
-        p.vy *= 0.94;
-        p.y += p.vy;
+        p.vy += Math.sin(t * 0.002 + p.phase) * 0.06 + (Math.random() - 0.5) * 0.18;
+        p.vy *= 0.94; p.y += p.vy;
       } else if (u < GATE_S) {
         if (p.reject && u < GATE_B + 0.015) { p.rejected = true; continue; }
-        const ty = lanes[p.lane];
-        p.y = lerp(p.y, ty, 0.035);
-        p.vy *= 0.8;
+        p.y = lerp(p.y, lanes[p.lane], 0.035); p.vy *= 0.8;
       } else {
         const k = clamp((u - GATE_S) / (GATE_G - GATE_S), 0, 1);
-        const ty = lerp(lanes[p.lane], streams[p.stream], k * k);
+        let ty = lerp(lanes[p.lane], streams[p.stream], k * k);
+        if (sk && u >= GATE_G) {
+          // gold stream bends into the laptop
+          const kk = clamp((p.x - GATE_G * W) / Math.max(40, sk.x - GATE_G * W), 0, 1);
+          ty = lerp(ty, sk.y, kk * kk);
+          if (p.x >= sk.x - 4) {
+            bus.pulse = Math.min(1, bus.pulse + 0.05);
+            particles[i] = spawn(false);
+            continue;
+          }
+        }
         p.y = lerp(p.y, ty, 0.08);
       }
 
-      // pointer: records part around the cursor
       if (mouse.active) {
         const dx = p.x - mouse.x, dy = p.y - mouse.y;
         const d2 = dx * dx + dy * dy;
-        if (d2 < 12000) {
-          const f = (1 - d2 / 12000) * 2.2;
-          p.y += (dy / Math.sqrt(d2 + 0.01)) * f;
-        }
+        if (d2 < 12000) p.y += (dy / Math.sqrt(d2 + 0.01)) * (1 - d2 / 12000) * 2.2;
       }
 
       p.trail.push(p.x, p.y);
       if (p.trail.length > 16) p.trail.splice(0, 2);
-
       if (p.x > W + 20 || p.life <= 0 || p.y > H + 20) particles[i] = spawn(false);
     }
   }
@@ -119,16 +135,13 @@ export function startMedallionField(canvas) {
     return mix(COLORS.silver, COLORS.gold, clamp((u - GATE_S) / 0.12, 0, 1));
   }
 
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-
-    // gates
+  function drawFlow() {
     [GATE_B, GATE_S, GATE_G].forEach((g, i) => {
       const x = g * W;
       const grad = ctx.createLinearGradient(0, 0, 0, H);
       const c = i === 0 ? COLORS.bronze : i === 1 ? COLORS.silver : COLORS.gold;
       grad.addColorStop(0, `rgba(${c},0)`);
-      grad.addColorStop(0.5, `rgba(${c},0.22)`);
+      grad.addColorStop(0.5, `rgba(${c},${0.22 * flowAlpha})`);
       grad.addColorStop(1, `rgba(${c},0)`);
       ctx.fillStyle = grad;
       ctx.fillRect(x - 0.5, 0, 1, H);
@@ -137,7 +150,7 @@ export function startMedallionField(canvas) {
     ctx.lineCap = "round";
     for (const p of particles) {
       const c = colorFor(p);
-      const a = p.rejected ? p.life : 0.85;
+      const a = (p.rejected ? p.life : 0.85) * flowAlpha;
       const tr = p.trail;
       if (tr.length >= 4) {
         ctx.beginPath();
@@ -152,20 +165,91 @@ export function startMedallionField(canvas) {
       ctx.fillStyle = `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
       ctx.fill();
     }
+  }
 
-    // gold sink glow
-    const gx = W * 0.97, gy = streams[1];
-    const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, H * 0.28);
-    g.addColorStop(0, "rgba(242,181,68,0.16)");
-    g.addColorStop(1, "rgba(242,181,68,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
+  /* ── Intro: particles assemble into the heading text ───────────────────── */
+  function sampleName() {
+    if (!nameEl) return [];
+    const crect = canvas.getBoundingClientRect();
+    const off = document.createElement("canvas");
+    off.width = Math.ceil(W); off.height = Math.ceil(H);
+    const o = off.getContext("2d");
+    o.fillStyle = "#fff";
+    o.textBaseline = "alphabetic";
+    let fs = 0;
+    nameEl.querySelectorAll(".line").forEach((line) => {
+      const r = line.getBoundingClientRect();
+      const inner = line.querySelector(".line-inner");
+      const cs = getComputedStyle(inner);
+      fs = parseFloat(cs.fontSize);
+      o.font = `900 ${fs}px Archivo, "Arial Black", sans-serif`;
+      try { o.fontStretch = "semi-expanded"; } catch { /* older engines */ }
+      try { o.letterSpacing = `${-0.035 * fs}px`; } catch { /* older engines */ }
+      const text = (inner.textContent || "").toUpperCase();
+      // caps sit on the baseline; line box is ~0.82em tall
+      o.fillText(text, r.left - crect.left, r.top - crect.top + fs * 0.74);
+    });
+    if (!fs) return [];
+    const stepPx = Math.max(3, Math.round(fs / 26));
+    const data = o.getImageData(0, 0, off.width, off.height).data;
+    const pts = [];
+    for (let y = 0; y < off.height; y += stepPx) {
+      for (let x = 0; x < off.width; x += stepPx) {
+        if (data[(y * off.width + x) * 4 + 3] > 140) pts.push([x, y]);
+      }
+    }
+    for (let i = pts.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [pts[i], pts[j]] = [pts[j], pts[i]]; }
+    return pts.slice(0, W < 700 ? 900 : 1800);
+  }
+
+  function startIntro(onReveal) {
+    const pts = sampleName();
+    if (!pts.length) { onReveal(); return; }
+    intro = {
+      start: performance.now(),
+      revealed: false,
+      onReveal,
+      dots: pts.map(([tx, ty]) => ({
+        sx: Math.random() < 0.6 ? -20 - Math.random() * 80 : Math.random() * W,
+        sy: Math.random() * H,
+        tx, ty,
+        d: Math.random() * 0.45,
+        c: mix(COLORS.bronze, COLORS.gold, Math.random())
+      }))
+    };
+    flowAlpha = 0;
+    start();
+  }
+
+  function drawIntro(now) {
+    const e = (now - intro.start) / 1000;
+    const ASSEMBLE = 1.15, HOLD = 0.35, RELEASE = 0.9;
+    const all = ASSEMBLE + 0.45;
+    if (!intro.revealed && e > all + HOLD * 0.4) {
+      intro.revealed = true;
+      intro.onReveal();
+    }
+    const rel = clamp((e - all - HOLD) / RELEASE, 0, 1);
+    flowAlpha = rel;
+    for (const d of intro.dots) {
+      const k = easeOutExpo(clamp((e - d.d) / ASSEMBLE, 0, 1));
+      let x = lerp(d.sx, d.tx, k), y = lerp(d.sy, d.ty, k);
+      // release: drift right and fade as the real heading takes over
+      x += rel * rel * 220;
+      const a = (1 - rel) * (0.45 + 0.55 * k);
+      const c = k > 0.98 ? mix(d.c, COLORS.ink, 0.6) : d.c;
+      ctx.fillStyle = `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+      ctx.fillRect(x - 1.2, y - 1.2, 2.4, 2.4);
+    }
+    if (rel >= 1) { intro = null; flowAlpha = 1; }
   }
 
   function frame(t) {
     if (!running) return;
     step(t);
-    draw();
+    ctx.clearRect(0, 0, W, H);
+    if (flowAlpha > 0) drawFlow();
+    if (intro) drawIntro(performance.now());
     raf = requestAnimationFrame(frame);
   }
 
@@ -174,37 +258,33 @@ export function startMedallionField(canvas) {
     running = true;
     raf = requestAnimationFrame(frame);
   }
-  function stop() {
-    running = false;
-    cancelAnimationFrame(raf);
-  }
+  function stop() { running = false; cancelAnimationFrame(raf); }
+
+  const warm = () => { for (let i = 0; i < 420; i++) step(i * 16); ctx.clearRect(0, 0, W, H); drawFlow(); };
 
   layout();
-  if (reduce) {
-    for (let i = 0; i < 420; i++) step(i * 16);
-    draw();
-  } else {
-    start();
-  }
+  if (reduce) warm(); else start();
+
+  const onIntro = () => {
+    if (reduce) { window.dispatchEvent(new Event("av:name-ready")); return; }
+    const go = () => startIntro(() => window.dispatchEvent(new Event("av:name-ready")));
+    const fontReady = document.fonts && document.fonts.load
+      ? Promise.race([document.fonts.load('900 100px "Archivo"'), new Promise((r) => setTimeout(r, 1200))])
+      : Promise.resolve();
+    fontReady.then(go, go);
+  };
+  window.addEventListener("av:hero-intro", onIntro);
 
   let rT;
-  const onResize = () => {
-    clearTimeout(rT);
-    rT = setTimeout(() => { layout(); if (reduce) { for (let i = 0; i < 420; i++) step(i * 16); draw(); } }, 150);
-  };
+  const onResize = () => { clearTimeout(rT); rT = setTimeout(() => { layout(); if (reduce) warm(); }, 150); };
   const onMove = (e) => {
     const r = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - r.left;
-    mouse.y = e.clientY - r.top;
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
     mouse.active = mouse.y > 0 && mouse.y < r.height;
   };
   const onLeave = () => { mouse.active = false; };
   const onVis = () => (document.hidden ? stop() : start());
-
-  const io = new IntersectionObserver(([en]) => {
-    visible = en.isIntersecting;
-    visible ? start() : stop();
-  });
+  const io = new IntersectionObserver(([en]) => { visible = en.isIntersecting; visible ? start() : stop(); });
   io.observe(canvas);
 
   window.addEventListener("resize", onResize);
@@ -215,6 +295,7 @@ export function startMedallionField(canvas) {
   return () => {
     stop();
     io.disconnect();
+    window.removeEventListener("av:hero-intro", onIntro);
     window.removeEventListener("resize", onResize);
     window.removeEventListener("pointermove", onMove);
     document.removeEventListener("pointerleave", onLeave);
