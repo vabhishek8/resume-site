@@ -179,6 +179,8 @@ export const EXPERIENCE = [
 export const PROJECTS = [
   {
     id: "weather",
+    arch: ["Open-Meteo archive", "Bronze: raw daily pulls", "Quality gate: schema, nulls, range, duplicates, consistency", "DuckDB: rolling 30-day anomalies, P90 heat flags", "Plotly dashboard on a daily GitHub Actions run"],
+    iac: "Bicep maps the same design to Data Factory, ADLS Gen2, Synapse Serverless SQL, Key Vault and Log Analytics alerting, deliberately not left running.",
     badge: "Live pipeline · updates daily",
     domain: "Platform pattern",
     title: "AU Weather Medallion Pipeline",
@@ -193,6 +195,8 @@ export const PROJECTS = [
   },
   {
     id: "aml",
+    arch: ["Synthetic transactions with injected cases", "SQL typologies: structuring, layering, impossible travel, outliers, high-risk corridors", "Robust median/MAD outlier statistic", "Case-level recall tests in pytest", "Dashboard on a daily GitHub Actions run"],
+    iac: "Bicep: private endpoints everywhere, immutable ADLS storage, Microsoft Purview, Key Vault RBAC.",
     badge: "Live pipeline · scheduled daily",
     domain: "Banking / financial services",
     title: "AML Transaction Monitoring Pipeline",
@@ -207,6 +211,8 @@ export const PROJECTS = [
   },
   {
     id: "basel",
+    arch: ["Synthetic daily balance sheet", "HQLA classification with the 40% Level 2 and nested 15% Level 2B caps", "LCR and NSFR calculation", "Golden-value regression tests", "Dashboard on a daily GitHub Actions run"],
+    iac: "Bicep: Synapse Dedicated SQL Pool, geo-redundant ADLS Gen2, pending and submitted containers for maker-checker, Key Vault RBAC.",
     badge: "Live pipeline · scheduled daily",
     domain: "Regulatory reporting",
     title: "Basel III Liquidity Reporting Pipeline",
@@ -294,4 +300,34 @@ export const CERT_NOTE =
 
 export const CONTACT = {
   lede: "Open to Azure Data Engineer / Senior Data Engineer roles. Based in Sydney, open to relocation."
+};
+
+// Scroll storytelling: the page reads as one pipeline run. Each section is a
+// stage; the rail on the left shows where the visitor is in the story.
+export const CHAPTERS = [
+  { sel: ".hero", stage: "Raw", label: "Hello" },
+  { sel: "#about", stage: "Bronze", label: "Profile" },
+  { sel: "[data-medallion]", stage: "Bronze", label: "Approach" },
+  { sel: "#skills", stage: "Silver", label: "Capabilities" },
+  { sel: "#experience", stage: "Silver", label: "Track record" },
+  { sel: "#projects", stage: "Gold", label: "Proof" },
+  { sel: "#education", stage: "Gold", label: "Foundations" },
+  { sel: "#contact", stage: "Serve", label: "Contact" }
+];
+
+// Figure layer. Drop generated poses into /public/img/figure/ and set the
+// paths here (WebP or PNG, black or transparent background, ~2000px tall).
+// Any pose left null falls back to "hero"; if "hero" is null the halftone
+// data portrait is used. sectionPose maps chapter label to pose key.
+export const FIGURE = {
+  poses: {
+    hero: null,     // e.g. "/img/figure/hero.webp"
+    about: null,    // e.g. "/img/figure/about.webp"  (shown on the left)
+    work: null,     // e.g. "/img/figure/work.webp"
+    contact: null   // e.g. "/img/figure/contact.webp"
+  },
+  sectionPose: {
+    Hello: "hero", Profile: "about", Approach: "work", Capabilities: "hero",
+    "Track record": "hero", Proof: "work", Foundations: "hero", Contact: "contact"
+  }
 };
