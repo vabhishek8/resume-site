@@ -2,20 +2,29 @@ import { useEffect, useState } from "react";
 import { NAV, SITE, MARQUEE } from "../content.js";
 
 /* Section heading: bold sans line(s) + italic serif line(s) + accent full stop.
-   lines: [["bold"|"serif", "text"], ...] — each line is masked for the reveal. */
-export function Heading({ id, index, label, lines, dot = true, as: Tag = "h2", className = "" }) {
+   Characters are split for the kinetic reveal; screen readers get the plain text. */
+export function Heading({ id, label, lines, dot = true, as: Tag = "h2", className = "" }) {
+  const plain = lines.map(([, t]) => t).join(" ");
   return (
     <header className={"sec-head " + className}>
       <p className="eyebrow" data-reveal>
         <span className="eyebrow-dash" aria-hidden="true"></span>
-        <span className="eyebrow-idx">{index}</span> {label}
+        {label}
       </p>
-      <Tag id={id} className="display" data-split>
+      <Tag id={id} className="display" data-split aria-label={plain}>
+        <span className="wipe" aria-hidden="true"></span>
         {lines.map(([style, text], i) => (
-          <span className="line" key={i}>
+          <span className="line" key={i} aria-hidden="true">
             <span className={"line-inner " + (style === "serif" ? "serif" : "bold")}>
-              {text}
-              {dot && i === lines.length - 1 ? <span className="dot" aria-hidden="true">.</span> : null}
+              {text.split(" ").map((word, wi, arr) => (
+                <span key={wi}>
+                  <span className="word">
+                    {[...word].map((ch, ci) => <span className="ch" key={ci}>{ch}</span>)}
+                  </span>
+                  {wi < arr.length - 1 ? " " : null}
+                </span>
+              ))}
+              {dot && i === lines.length - 1 ? <span className="dot ch">.</span> : null}
             </span>
           </span>
         ))}
@@ -43,7 +52,6 @@ export function Header() {
           {NAV.map((l, i) => (
             <li key={l.id}>
               <a href={`#${l.id}`} data-nav={l.id}>
-                <span className="nav-idx">0{i + 1}</span>
                 {l.label}
               </a>
             </li>
@@ -65,7 +73,6 @@ export function Header() {
           {NAV.map((l, i) => (
             <li key={l.id}>
               <a href={`#${l.id}`} onClick={() => setOpen(false)}>
-                <span className="nav-idx">0{i + 1}</span>
                 {l.label}
               </a>
             </li>
@@ -128,7 +135,8 @@ export function Marquee() {
 export function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" data-footer>
+      <p className="footer-kicker" data-reveal>That's the whole pipeline. Thanks for scrolling.</p>
       <p className="footer-giant" aria-hidden="true">
         <span className="bold">{SITE.name.first}</span> <span className="serif">{SITE.name.last}</span>
         <span className="dot">.</span>

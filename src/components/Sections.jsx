@@ -10,7 +10,6 @@ export function About() {
     <section id="about" className="section about" aria-labelledby="about-h">
       <Heading
         id="about-h"
-        index="01"
         label="About"
         lines={[["bold", "Engineering"], ["serif", "the platform,"], ["bold", "not just the report"]]}
       />
@@ -43,14 +42,27 @@ export function Medallion() {
   return (
     <section className="section medallion" aria-labelledby="arch-h" data-medallion>
       <div className="med-pin">
-        <Heading
-          id="arch-h"
-          index="↳"
-          label="Architecture, in one line"
-          lines={[["bold", "Raw in."], ["serif", "Decisions out"]]}
-        />
+        <div className="med-top">
+          <Heading
+            id="arch-h"
+            label="Architecture, in one line"
+            lines={[["bold", "Raw in."], ["serif", "Decisions out"]]}
+          />
+            <div className="run" data-run>
+              <button className="btn btn-primary run-btn" type="button" data-run-btn data-magnetic data-cursor="Run">
+                <span className="run-label">Run the pipeline</span><span className="btn-arrow" aria-hidden="true">&#9654;</span>
+              </button>
+              <dl className="run-stats" aria-live="polite">
+                <div><dt>Ingested</dt><dd data-run-n="in">0</dd></div>
+                <div><dt>Landed in bronze</dt><dd data-run-n="bronze">0</dd></div>
+                <div className="bad"><dt>Quarantined at the gate</dt><dd data-run-n="bad">0</dd></div>
+                <div className="good"><dt>Served from gold</dt><dd data-run-n="gold">0</dd></div>
+              </dl>
+              <p className="run-note">Simulated run on synthetic records, so you can watch the gates work.</p>
+            </div>
+        </div>
         <div className="med-stage">
-          <svg className="med-svg" viewBox="0 0 1160 220" role="img" aria-label="Pipeline: Sources, Bronze, Silver, Gold, Serve">
+          <svg className="med-svg" data-med-svg viewBox="0 0 1160 220" role="img" aria-label="Pipeline: Sources, Bronze, Silver, Gold, Serve">
             <defs>
               <linearGradient id="medGrad" x1="0" x2="1" y1="0" y2="0">
                 <stop offset="0%" stopColor="#8b93a3" />
@@ -67,12 +79,12 @@ export function Medallion() {
                 <animateMotion dur="4.2s" begin={`${i * 0.7}s`} repeatCount="indefinite" path="M80 110 H1080" />
               </circle>
             ))}
+            <g data-run-layer></g>
             {MEDALLION.map((m, i) => (
               <g key={m.key} className={"med-node node-" + m.key} data-med-node={i} transform={`translate(${NODE_X[i]} 110)`}>
                 <circle r="34" className="med-ring" />
                 <circle r="9" className="med-core" />
                 <text y="-52" textAnchor="middle" className="med-label">{m.label.toUpperCase()}</text>
-                <text y="64" textAnchor="middle" className="med-idx">{`0${i + 1}`}</text>
               </g>
             ))}
           </svg>
@@ -80,7 +92,7 @@ export function Medallion() {
           <ol className="med-steps">
             {MEDALLION.map((m, i) => (
               <li key={m.key} className={"med-step step-" + m.key} data-med-step={i}>
-                <p className="med-step-k"><span>0{i + 1}</span> {m.label}</p>
+                <p className="med-step-k">{m.label}</p>
                 <h3>{m.title}</h3>
                 <p>{m.body}</p>
                 <ul className="chips">
@@ -89,6 +101,7 @@ export function Medallion() {
               </li>
             ))}
           </ol>
+
         </div>
       </div>
     </section>
@@ -100,7 +113,7 @@ const EVIDENCE = { prod: "In production", built: "Public repo" };
 export function Skills() {
   return (
     <section id="skills" className="section skills" aria-labelledby="skills-h">
-      <Heading id="skills-h" index="02" label="Skills" lines={[["bold", "Capabilities,"], ["serif", "not buzzwords"]]} />
+      <Heading id="skills-h" label="Skills" lines={[["bold", "Capabilities,"], ["serif", "not buzzwords"]]} />
       <div className="sec-lede skills-lede" data-reveal>
         <p>Grouped by what a data platform needs, not by tool count. No self-rated bars: each tool is tagged with where you can check it.</p>
         <p className="legend">
@@ -109,9 +122,9 @@ export function Skills() {
         </p>
       </div>
       <div className="skill-grid">
-        {SKILLS.map((g, gi) => (
+        {SKILLS.map((g) => (
           <div className="skill-group" key={g.title} data-reveal>
-            <h3><span className="sg-idx">0{gi + 1}</span>{g.title}</h3>
+            <h3>{g.title}</h3>
             <ul>
               {g.items.map(([name, ev]) => (
                 <li key={name} className="skill-row" data-cursor-hover>
@@ -133,7 +146,7 @@ export function Skills() {
 export function Experience() {
   return (
     <section id="experience" className="section experience" aria-labelledby="exp-h">
-      <Heading id="exp-h" index="03" label="Experience" lines={[["bold", "Track"], ["serif", "record"]]} />
+      <Heading id="exp-h" label="Experience" lines={[["bold", "Track"], ["serif", "record"]]} />
       <div className="timeline" data-timeline>
         <span className="tl-rail" aria-hidden="true"><span className="tl-fill" data-tl-fill></span></span>
         <ol className="tl-ol">
@@ -160,7 +173,7 @@ export function Experience() {
 export function Projects() {
   return (
     <section id="projects" className="section projects" aria-labelledby="proj-h">
-      <Heading id="proj-h" index="04" label="Projects" lines={[["bold", "Selected"], ["serif", "engineering work"]]} />
+      <Heading id="proj-h" label="Projects" lines={[["bold", "Selected"], ["serif", "engineering work"]]} />
       <p className="sec-lede" data-reveal>Framed by architecture and outcome, not by dashboard count.</p>
 
       <div className="stack" data-stack>
@@ -169,7 +182,6 @@ export function Projects() {
             <div className="case-inner">
               <div className="case-main">
                 <div className="case-top">
-                  <span className="case-idx">0{i + 1}<span>/0{PROJECTS.length}</span></span>
                   <span className="badge"><span className="live-dot" aria-hidden="true"></span>{p.badge}</span>
                 </div>
                 <p className="case-domain">{p.domain}</p>
@@ -203,9 +215,8 @@ export function Projects() {
       <div className="delivery">
         <p className="eyebrow" data-reveal><span className="eyebrow-dash" aria-hidden="true"></span>In production at Unisys</p>
         <div className="delivery-grid">
-          {DELIVERY.map((d, i) => (
+          {DELIVERY.map((d) => (
             <article className="dcard" key={d.title} data-reveal data-tilt>
-              <span className="dcard-idx">0{i + 1}</span>
               <ul className="tags">{d.tags.map((t) => <li key={t}>{t}</li>)}</ul>
               <h3>{d.title}</h3>
               <p>{d.body}</p>
@@ -222,7 +233,7 @@ export function Projects() {
 export function Education() {
   return (
     <section id="education" className="section education" aria-labelledby="edu-h">
-      <Heading id="edu-h" index="05" label="Education & Certifications" lines={[["bold", "The"], ["serif", "foundations"]]} />
+      <Heading id="edu-h" label="Education & Certifications" lines={[["bold", "The"], ["serif", "foundations"]]} />
       <div className="edu-grid">
         <ol className="edu-list">
           {EDUCATION.map((e) => (
@@ -294,7 +305,6 @@ export function Contact() {
     <section id="contact" className="section contact" aria-labelledby="contact-h">
       <Heading
         id="contact-h"
-        index="06"
         label="Contact"
         lines={[["bold", "Let's talk"], ["serif", "data platforms"]]}
         className="contact-head"
@@ -341,6 +351,7 @@ export function Contact() {
           </li>
         </ul>
       </div>
+      <div className="contact-light" aria-hidden="true"></div>
       <div className="contact-glow" aria-hidden="true"></div>
     </section>
   );

@@ -25,7 +25,7 @@ export default function Hero() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const stop = startMedallionField(canvasRef.current);
+    const stop = startMedallionField(canvasRef.current, document.querySelector("[data-hero-name]"));
     return stop;
   }, []);
 
@@ -36,9 +36,9 @@ export default function Hero() {
 
       <div className="hero-gates" aria-hidden="true">
         <span style={{ "--x": "0%" }}>raw</span>
-        <span style={{ "--x": "33.333%" }}>bronze</span>
-        <span style={{ "--x": "58%" }}>silver</span>
-        <span style={{ "--x": "80%" }}>gold</span>
+        <span style={{ "--x": "24%" }}>bronze</span>
+        <span style={{ "--x": "42%" }}>silver</span>
+        <span style={{ "--x": "60%" }}>gold</span>
       </div>
 
       <div className="hero-inner">
@@ -47,9 +47,9 @@ export default function Hero() {
           {SITE.location} · {SITE.availability}
         </p>
 
-        <h1 className="hero-name" aria-label={`${SITE.name.first} ${SITE.name.last}`}>
-          <span className="line"><span className="line-inner bold" data-hero-line>{SITE.name.first}</span></span>
-          <span className="line"><span className="line-inner bold" data-hero-line>{SITE.name.last}<span className="dot">.</span></span></span>
+        <h1 className="hero-name" data-hero-name aria-label={`${SITE.name.first} ${SITE.name.last}`}>
+          <span className="line"><span className="line-inner bold">{SITE.name.first}</span></span>
+          <span className="line"><span className="line-inner bold">{SITE.name.last}<span className="dot">.</span></span></span>
         </h1>
 
         <p className="hero-tagline" data-hero>
@@ -74,15 +74,6 @@ export default function Hero() {
         </div>
       </div>
 
-      <figure className="hero-portrait" data-hero-portrait>
-        <div className="portrait-frame">
-          <img src={SITE.portrait} alt={`Portrait of ${SITE.name.first} ${SITE.name.last}`} width="720" height="960" fetchPriority="high" />
-          <span className="portrait-scan" aria-hidden="true"></span>
-        </div>
-        <figcaption>
-          <span className="fc-k">node</span> av-01 <span className="fc-k">status</span> <span className="ok">● online</span>
-        </figcaption>
-      </figure>
 
       <div className="hero-bar" data-hero>
         <span><span className="live-dot" aria-hidden="true"></span> SYD <SydneyClock /> AEST</span>
