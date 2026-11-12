@@ -24,7 +24,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/img/favicon-512.png">
 <link rel="apple-touch-icon" href="/img/favicon-192.png">
 <link rel="preload" as="image" media="(min-width: 900px)" href="/img/figure/hero-960.webp" imagesrcset="/img/figure/hero-480.webp 480w, /img/figure/hero-720.webp 720w, /img/figure/hero-960.webp 960w, /img/figure/hero-1280.webp 1280w" imagesizes="(min-width: 1024px) min(690px, 44vw), 100vw" fetchpriority="high">
-<link rel="preload" as="image" media="(max-width: 899px)" href="/img/figure/hero-m-800.webp" imagesrcset="/img/figure/hero-m-600.webp 600w, /img/figure/hero-m-800.webp 800w, /img/figure/hero-m-1000.webp 1000w" imagesizes="max(100vw, 58svh)" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" media="(max-width: 899px)" href="/img/figure/hero-m-800.avif" imagesrcset="/img/figure/hero-m-600.avif 600w, /img/figure/hero-m-800.avif 800w, /img/figure/hero-m-1000.avif 1000w" imagesizes="max(100vw, 58svh)" fetchpriority="high">
 <link rel="preload" href="/fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <script type="application/ld+json">
@@ -53,6 +53,10 @@
     <p class="pre-count"><span data-pre-count>000</span>%</p>
   </div>
 </div>
+<!-- Mobile hero subject (layer 2 of the magazine cover). Static so the LCP
+     image doesn't wait for the JS bundle. Below 900px it loads the AVIF/WebP
+     cut-out; on desktop the <img> keeps its 1x1 data URI and fetches nothing. -->
+<div class="m-cover" aria-hidden="true"><picture><source media="(max-width: 899px)" type="image/avif" srcset="/img/figure/hero-m-600.avif 600w, /img/figure/hero-m-800.avif 800w, /img/figure/hero-m-1000.avif 1000w" sizes="max(100vw, 58svh)"><source media="(max-width: 899px)" type="image/webp" srcset="/img/figure/hero-m-600.webp 600w, /img/figure/hero-m-800.webp 800w, /img/figure/hero-m-1000.webp 1000w" sizes="max(100vw, 58svh)"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1000" height="1149" fetchpriority="high" decoding="async"></picture></div>
 <div id="root"></div>
 <script type="module" src="/src/main.jsx"></script>
 </body>
