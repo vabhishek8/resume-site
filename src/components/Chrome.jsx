@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NAV, SITE, MARQUEE, CHAPTERS } from "../content.js";
+import { NAV, SITE, MARQUEE, CHAPTERS, NOW, COLOPHON } from "../content.js";
 import { lockScroll, unlockScroll } from "../lib/scrollLock.js";
 
 /* Section heading: bold sans line(s) + italic serif line(s) + accent full stop.
@@ -146,9 +146,16 @@ export function Footer() {
         <span className="bold">{SITE.name.first}</span> <span className="serif">{SITE.name.last}</span>
         <span className="dot">.</span>
       </p>
+      <div className="footer-trail">
+        <p className="now"><span className="live-dot" aria-hidden="true"></span><strong>Now, {NOW.month}.</strong> {NOW.text}</p>
+        <div className="colophon">
+          <h2 className="colophon-h">How this site is made</h2>
+          {COLOPHON.map((c, i) => <p key={i}>{c}</p>)}
+          <p><a href="https://github.com/vabhishek8/resume-site" target="_blank" rel="noopener noreferrer">The source is on GitHub ↗</a></p>
+        </div>
+      </div>
       <div className="footer-row">
-        <p>&copy; {year} {SITE.name.first} {SITE.name.last}. Built from scratch, no template.</p>
-        <p className="footer-stack">React · GSAP · Azure Static Web Apps</p>
+        <p>&copy; {year} {SITE.name.first} {SITE.name.last}</p>
         <a href="#top" data-cursor="Top">Back to top &uarr;</a>
       </div>
     </footer>

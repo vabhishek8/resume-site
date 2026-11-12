@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PROJECTS } from "../content.js";
+import { FlowDiagram, CodeExcerpts, TestOutput, RunHistory, RunBadge } from "./Pipelines.jsx";
 import { lockScroll, unlockScroll } from "../lib/scrollLock.js";
 
 /* Case-study overlay: deep-linkable (#case-<id>), Esc / back to close,
@@ -67,7 +68,7 @@ export function CaseStudy({ id, onClose }) {
     <div className={"cs-backdrop case-" + p.id} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="cs" role="dialog" aria-modal="true" aria-labelledby="cs-title" ref={dlg}>
         <header className="cs-top">
-          <span className="badge"><span className="live-dot" aria-hidden="true"></span>{p.badge}</span>
+          <RunBadge p={p} />
           <button className="cs-close" type="button" onClick={onClose} aria-label="Close case study">
             <span aria-hidden="true">Close</span><i aria-hidden="true"></i>
           </button>
@@ -83,25 +84,34 @@ export function CaseStudy({ id, onClose }) {
               <p className="cm-value">{p.metric.value}<span>{p.metric.unit}</span></p>
               <p className="cm-label">{p.metric.label}</p>
             </div>
-            <p className="cs-catch"><span>The catch</span>{p.catchLine}</p>
+            <p className="cs-catch"><span>What went wrong</span>{p.catchLine}</p>
           </div>
-
-          <section className="cs-block" aria-labelledby="cs-arch">
-            <h3 id="cs-arch">Architecture</h3>
-            <ol className="cs-flow">
-              {p.arch.map((step, i) => (
-                <li key={step} style={{ "--i": i }}>
-                  <span className="cs-node" aria-hidden="true"></span>
-                  <span className="cs-step">{step}</span>
-                </li>
-              ))}
-            </ol>
-            <p className="cs-iac"><span>Infrastructure as code</span>{p.iac}</p>
-          </section>
 
           <section className="cs-block" aria-labelledby="cs-over">
             <h3 id="cs-over">Overview</h3>
             <p className="cs-body">{p.body}</p>
+          </section>
+
+          <section className="cs-block" aria-labelledby="cs-arch">
+            <h3 id="cs-arch">How it's wired</h3>
+            <FlowDiagram p={p} />
+            <p className="cs-iac"><span>The Azure version</span>{p.iac}</p>
+          </section>
+
+          <section className="cs-block" aria-labelledby="cs-bug">
+            <h3 id="cs-bug">What broke, and the fix</h3>
+            <p className="cs-body">{p.bug}</p>
+            <CodeExcerpts p={p} />
+          </section>
+
+          <section className="cs-block" aria-labelledby="cs-tests">
+            <h3 id="cs-tests">Tests</h3>
+            <TestOutput p={p} />
+          </section>
+
+          <section className="cs-block" aria-labelledby="cs-runs">
+            <h3 id="cs-runs">Recent runs</h3>
+            <RunHistory p={p} />
           </section>
 
           <section className="cs-block" aria-labelledby="cs-stack">
