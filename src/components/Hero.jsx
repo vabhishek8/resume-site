@@ -50,6 +50,13 @@ export default function Hero() {
       </div>
 
       <figure className="hero-photo" aria-hidden="true">
+        <picture>
+        <source
+          media="(max-width: 899px)"
+          type="image/webp"
+          srcSet={FIGURE.mobileWidths.map((w) => `${FIGURE.poses.hero}-m-${w}.webp ${w}w`).join(", ")}
+          sizes="100vw"
+        />
         <img
           alt=""
           width="1493"
@@ -60,6 +67,7 @@ export default function Hero() {
           fetchPriority="high"
           decoding="async"
         />
+        </picture>
       </figure>
       <div className="hero-inner">
         <p className="eyebrow hero-eyebrow" data-hero>
