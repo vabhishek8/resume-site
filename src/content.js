@@ -12,7 +12,7 @@ export const SITE = {
   tagline: { plain: "Building data platforms that", italic: "don't fall over at 2 a.m." },
   role: "Senior Business Intelligence Engineer", // must match the LinkedIn title exactly
   lede:
-    "4+ years at Unisys engineering the data layer behind financial-services reporting: SQL Server and SSIS pipelines on-prem, Databricks and PySpark over ADLS and Synapse in Azure, and Azure DevOps-governed releases from DEV to PROD. Correct, on time, and loud when something breaks.",
+    "At Unisys in Sydney since 2022, working on data for financial-services clients. Some days that's SQL Server and SSIS on-prem, other days it's Databricks and PySpark in Azure. All of it ships through Azure DevOps.",
   linkedin: "https://linkedin.com/in/abhishekvadlamudi",
   linkedinLabel: "linkedin.com/in/abhishekvadlamudi",
   github: "https://github.com/vabhishek8",
@@ -30,16 +30,12 @@ export const NAV = [
 ];
 
 export const ABOUT = {
+  // Numbers live inside sentences here, not in a stat strip.
   paragraphs: [
-    "I'm a Senior Business Intelligence Engineer at Unisys in Sydney. Since February 2022 I've moved steadily from building reports to engineering the layer underneath them: ingestion, transformation, data models, and the release process that keeps them honest. Most of that work serves financial-services clients, where a wrong number is an incident, not a typo.",
-    "Day to day that means SQL Server (T-SQL, stored procedures, SQL Agent, SSIS) and SSRS on the on-prem side, and Azure Databricks with PySpark over Azure Data Lake Storage and Synapse on the platform side, all released through Azure DevOps CI/CD. I design for failure modes first: validation gates before data moves downstream, monitoring that alerts before stakeholders do, and environment separation so nothing reaches PROD untested. A pipeline that fails silently is worse than one that fails loudly.",
-    "Outside work I build public, production-pattern pipelines (medallion weather, AML transaction monitoring, Basel III liquidity) with tests, scheduled runs and Bicep IaC, so the engineering can be inspected, not just claimed. And I translate across the room: specs for engineers, runbooks for operations, and plain answers for stakeholders who just need to know the numbers are right."
-  ],
-  stats: [
-    { to: 4, suffix: "+", label: "Years engineering data & BI at Unisys (since Feb 2022)" },
-    { to: 4, suffix: "h", label: "Cut from a critical daily load by moving it from VBA/batch to Python" },
-    { to: 40, prefix: "~", suffix: "%", label: "Less manual reporting effort after automating Power BI refresh pipelines" },
-    { to: 3, label: "Public production-pattern pipelines running on a daily schedule" }
+    "I started out building Power BI and SSRS reports. The refresh failures I kept chasing weren't really in the reports. They were in the SQL and DAX models underneath, so that's where I went, and over time I ended up owning the jobs, the stored procedures and the release process under them too.",
+    "Some of what came out of that: a daily load that ran on VBA and batch scripts is now Python, and it finishes four hours sooner. Automating the Power BI dataset refreshes cut manual reporting effort by about 40%, and the data went from daily to near-real-time.",
+    "I'd rather a pipeline fail loudly at 2 a.m. than succeed quietly with yesterday's numbers. So the checks go in before the data moves, not after someone questions a figure in a meeting. And nothing reaches PROD that hasn't been through UAT.",
+    "Outside work I run three small pipelines in public. They run every day on GitHub Actions, so you can read the code and the bugs instead of taking my word for it. Before any of this I was a relationship manager in commercial banking at Axis Bank, which is why I care what a number means and not only whether it loaded."
   ]
 };
 
@@ -50,35 +46,35 @@ export const MEDALLION = [
     key: "src",
     label: "Sources",
     title: "Ingest",
-    body: "Databases, SFTP drops, CSV/JSON files and REST APIs land as-is. Nothing is trusted yet.",
+    body: "SQL Server tables, SFTP drops, CSV and JSON files, the odd REST API. It all lands the way it arrived, and none of it is trusted yet.",
     tools: ["SQL Server", "SSIS", "SFTP / files", "REST APIs"]
   },
   {
     key: "bronze",
     label: "Bronze",
     title: "Land raw",
-    body: "Immutable, audit-grade raw storage. Nothing transformed, everything replayable.",
+    body: "Raw copies, never edited. If something goes wrong further down, I want to be able to replay from here.",
     tools: ["ADLS Gen2", "Immutable storage"]
   },
   {
     key: "silver",
     label: "Silver",
     title: "Gate quality",
-    body: "An explicit data-quality gate: schema, nulls, range, duplicate and consistency checks, before anything moves downstream.",
+    body: "This is the gate. Schema, nulls, ranges and duplicates get checked, and if a check fails the write stops and the run goes red.",
     tools: ["Python", "PySpark", "pytest"]
   },
   {
     key: "gold",
     label: "Gold",
-    title: "Model & compute",
-    body: "Business logic in SQL: rolling anomaly windows, AML typologies, LCR / NSFR, each checked against golden values.",
+    title: "Model and compute",
+    body: "The business logic lives in SQL. The Basel ratios are checked against values I worked out by hand, and the AML rules against cases I planted on purpose.",
     tools: ["DuckDB", "Synapse", "Databricks"]
   },
   {
     key: "serve",
     label: "Serve",
     title: "Deliver",
-    body: "Dashboards and reports on a real schedule, deployed through CI/CD with IaC behind it.",
+    body: "Dashboards on a daily schedule, deployed by CI. The Azure version of each one is written up in Bicep.",
     tools: ["Power BI", "Plotly", "GitHub Actions", "Bicep"]
   }
 ];
@@ -130,15 +126,14 @@ export const EXPERIENCE = [
     role: "Senior Business Intelligence Engineer",
     org: "Unisys",
     place: "Sydney, NSW",
-    dates: "Mar 2025 to Present",
+    dates: "Mar 2025 to present",
     bullets: [
-      "Own the end-to-end pipeline lifecycle for financial-services client engagements: source extraction, transformation, validation, and delivery into reporting layers on SQL Server and Azure.",
-      "Build and maintain production pipelines across SQL Server (stored procedures, SQL Agent, SSIS) and Azure Databricks / PySpark, landing data in Azure Data Lake Storage and Synapse.",
-      "Run release governance across DEV, SIT, UAT and PROD through Azure DevOps CI/CD and branching strategies, with UAT validation before anything reaches production.",
-      "Define data-quality checks at the transformation layer that catch schema drift, null propagation and SLA calculation errors before they reach downstream consumers.",
-      "Led an estate-wide cutover off a decommissioned file server: traced ~28 SQL Agent job steps across ~20 jobs, including coupled producer → consumer steps that had to move together.",
-      "Reconcile case records across 38 databases against customer and account perimeter lists to scope client data extracts.",
-      "Lead end-to-end workstreams within a 10+ person engineering and analyst team, from requirements through production deployment and handover."
+      "I own the pipelines for our financial-services engagements, from the source extract to the report. On one side that's SQL Server stored procedures, SQL Agent and SSIS. On the other it's Databricks and PySpark writing into ADLS and Synapse.",
+      "Releases move DEV, SIT, UAT, PROD through Azure DevOps. I run that process, and nothing skips UAT.",
+      "I write the data-quality checks at the transformation layer, the ones that catch schema drift, nulls leaking through, and SLA calculations that are quietly wrong.",
+      "When a file server was retired, I swept every SQL Agent job for references to it. That turned up about 28 steps across 20 jobs, including producer and consumer pairs that had to move in the same change.",
+      "Reconciled case records across 38 databases against customer and account perimeter lists, to work out what a client extract should actually contain.",
+      "I lead workstreams in a team of 10+ engineers and analysts, from requirements through to production handover."
     ]
   },
   {
@@ -147,10 +142,10 @@ export const EXPERIENCE = [
     place: "Sydney, NSW",
     dates: "May 2024 to Mar 2025",
     bullets: [
-      "Migrated a critical daily load from VBA and batch scripts to Python, cutting its runtime by 4 hours.",
-      "Rebuilt the SQL and DAX models behind SLA and operational KPI reporting, eliminating recurring refresh failures.",
-      "Automated Power BI dataset refresh pipelines and reporting data flows: ~40% less manual reporting effort, and data freshness from daily to near-real-time.",
-      "Implemented monitoring and alerting for critical pipelines, reducing undetected failures and improving mean time to resolution."
+      "Rewrote a critical daily load from VBA and batch scripts in Python. It now finishes four hours sooner.",
+      "Rebuilt the SQL and DAX models behind the SLA and operational KPI reports, which ended the recurring refresh failures.",
+      "Automated the Power BI dataset refreshes. About 40% less manual reporting effort, and the data moved from daily to near-real-time.",
+      "Added monitoring and alerting to the critical pipelines, so fewer failures went unnoticed and the ones that happened got fixed faster."
     ]
   },
   {
@@ -159,9 +154,9 @@ export const EXPERIENCE = [
     place: "Sydney, NSW",
     dates: "Feb 2022 to May 2024",
     bullets: [
-      "Built and automated operational reporting in Power BI, SSRS and Excel, establishing repeatable monthly delivery cycles.",
-      "Wrote T-SQL for extraction, transformation and validation, and ran UAT to verify data across environments before release.",
-      "Documented functional and technical specifications, bridging business stakeholders and engineering."
+      "Built operational reporting in Power BI, SSRS and Excel, and turned it into a monthly cycle that ran the same way every time.",
+      "Wrote the T-SQL for extraction, transformation and validation, and ran UAT to check the data matched across environments before release.",
+      "Wrote functional and technical specs. Mostly that meant translating between the business and the engineers."
     ]
   },
   {
@@ -170,57 +165,85 @@ export const EXPERIENCE = [
     place: "Telangana, India",
     dates: "Apr 2019 to Jan 2020",
     bullets: [
-      "Exceeded department KPIs by 20% for 5 consecutive months managing trade finance and FX payment workflows across import/export channels.",
-      "The banking-domain grounding behind my data work: I know what a regulator, a credit team and an operations desk each need from the same number."
+      "Beat department KPIs by 20% for five months in a row, managing trade finance and FX payment workflows for importers and exporters.",
+      "This is where I learned that a regulator, a credit team and an operations desk can each want something different from the same number."
     ]
   }
 ];
 
+// Each project carries the real diagram (redrawn from the Mermaid source in
+// its README), and src/artifacts.js carries the real code and test output.
 export const PROJECTS = [
   {
     id: "weather",
-    arch: ["Open-Meteo archive", "Bronze: raw daily pulls", "Quality gate: schema, nulls, range, duplicates, consistency", "DuckDB: rolling 30-day anomalies, P90 heat flags", "Plotly dashboard on a daily GitHub Actions run"],
-    iac: "Bicep maps the same design to Data Factory, ADLS Gen2, Synapse Serverless SQL, Key Vault and Log Analytics alerting, deliberately not left running.",
-    badge: "Live pipeline · updates daily",
-    domain: "Platform pattern",
+    workflow: "azure-medallion-weather-pipeline",
+    flow: {
+      source: ["Open-Meteo archive API", "ERA5 reanalysis"],
+      bronze: ["Raw JSON", "one file per city per run"],
+      gate: "schema · nulls · ranges · dupes · consistency",
+      silver: ["weather_daily.parquet", "typed, de-duplicated"],
+      gold: [["DuckDB SQL", "30-day rolling average and z-score"], ["Extreme heat", "90th percentile flag"]],
+      serve: ["Plotly dashboard", "GitHub Pages"]
+    },
+    iac: "Bicep maps the same design to Data Factory, ADLS Gen2, Synapse Serverless SQL, Key Vault and Log Analytics alerting. I don't leave it running.",
+    domain: "Public data, five capital cities",
     title: "AU Weather Medallion Pipeline",
     subtitle: "bronze → silver → gold",
     body:
-      "A self-built, production-pattern data pipeline for five Australian capital cities: Open-Meteo archive ingestion, an explicit data-quality gate (schema, nulls, range, duplicate, consistency checks), DuckDB SQL for rolling 30-day anomaly detection and 90th-percentile extreme-heat flagging, orchestrated on a real daily schedule via GitHub Actions with 15 passing pytest cases. Ships with Bicep IaC that maps the same design to production Azure (Data Factory, ADLS Gen2, Synapse Serverless SQL, Key Vault, Log Analytics alerting), authored but deliberately not left running 24/7, because a standing cloud estate for a portfolio-scale workload is a cost decision, not a demo requirement.",
-    metric: { value: "15", unit: "/15", label: "pytest cases passing on a daily GitHub Actions schedule" },
-    catchLine: "Cloud estate designed in Bicep, deliberately not left running: cost is a design decision.",
-    stack: ["Python", "DuckDB", "Plotly", "pytest", "GitHub Actions", "Bicep IaC (Data Factory / ADLS Gen2 / Synapse)"],
+      "Daily weather for the five largest Australian capitals, pulled from Open-Meteo. I started on the forecast endpoint, and the quality gate kept warning about null humidity, because that endpoint goes sparse beyond a short lookback. The warnings were right, so I moved to the archive endpoint. DuckDB works out 30-day rolling anomalies and flags days above the 90th percentile for heat. There's a Bicep template for the Azure version too, which I don't leave running. Paying for an always-on estate to process five rows a day would be a strange call.",
+    bug: "I pointed it at the forecast endpoint first. Past a short lookback it returns sparse daily humidity, and the null check flagged it on the first runs. I changed the source, not the check.",
+    metric: { value: "15", unit: "/15", label: "pytest cases passing, run before every scheduled pipeline run" },
+    catchLine: "The warnings were right. I changed the source, not the check.",
+    stack: ["Python", "DuckDB", "Plotly", "pytest", "GitHub Actions", "Bicep (Data Factory, ADLS Gen2, Synapse)"],
     repo: "https://github.com/vabhishek8/azure-medallion-weather-pipeline",
     live: "https://vabhishek8.github.io/azure-medallion-weather-pipeline/"
   },
   {
     id: "aml",
-    arch: ["Synthetic transactions with injected cases", "SQL typologies: structuring, layering, impossible travel, outliers, high-risk corridors", "Robust median/MAD outlier statistic", "Case-level recall tests in pytest", "Dashboard on a daily GitHub Actions run"],
-    iac: "Bicep: private endpoints everywhere, immutable ADLS storage, Microsoft Purview, Key Vault RBAC.",
-    badge: "Live pipeline · scheduled daily",
-    domain: "Banking / financial services",
+    workflow: "aml-transaction-monitoring-pipeline",
+    flow: {
+      source: ["Synthetic core-banking feed", "600 customers, about 90 days, 5 planted typologies"],
+      bronze: ["Raw transaction batch", "JSONL"],
+      gate: "schema · nulls · domain · range · dupes",
+      silver: ["transactions.parquet", "validated"],
+      gold: [["Structuring", "48h rolling window"], ["Layering", "wire in/out self-join"], ["Impossible travel", "LAG + haversine"], ["Amount outlier", "per-customer median/MAD"], ["High-risk corridor", "jurisdiction rule"]],
+      goldOut: "Composite risk score, 0 to 100",
+      serve: ["Alert queue", "dashboard on GitHub Pages"]
+    },
+    iac: "The Bicep assumes a bank's security review: private endpoints everywhere, immutable ADLS storage, Microsoft Purview and Key Vault RBAC.",
+    domain: "Banking",
     title: "AML Transaction Monitoring Pipeline",
     subtitle: "five typologies, recall-tested",
     body:
-      "A rule-based transaction-monitoring pipeline built for a banking-industry pivot: detects five real AML typologies (structuring, layering, impossible-travel, statistical amount outliers, high-risk-corridor routing) in SQL, validated with case-level recall tests against a synthetic ground truth (no real transaction data exists publicly, correctly). A naive mean/stddev outlier check initially caught only 20% of injected cases because the outlier was skewing its own baseline; switching to a robust median/MAD statistic took that to 100%, documented as a regression-guarded test, not just a fix. Bicep IaC is architected around what a bank's InfoSec review actually gates on: no public network access anywhere, immutable audit-grade storage, and Microsoft Purview for BCBS 239-aligned data governance.",
-    metric: { value: "20→100", unit: "%", label: "outlier recall after swapping mean/stddev for robust median/MAD" },
-    catchLine: "The outlier was skewing its own baseline. Fixed, then regression-guarded.",
-    stack: ["Python", "DuckDB (window functions, haversine SQL)", "Plotly", "pytest", "GitHub Actions", "Bicep (private endpoints, ADLS immutable storage, Purview, Key Vault RBAC)"],
+      "Five AML typologies written in SQL: structuring, layering, impossible travel, amount outliers and high-risk corridors. There's no public transaction data, and there shouldn't be, so the pipeline generates its own and plants known cases in it. Then the tests check that every planted case raised an alert. My first outlier rule used the mean and standard deviation and caught one case in five, because each outlier was inflating the baseline it was being measured against. Median and MAD caught all of them. The Bicep side is written for a bank's security review, with no public network access anywhere.",
+    bug: "The first outlier rule scored each transaction against the customer's mean and standard deviation. The outlier itself pulled both up, so it hid itself, and recall was 20%. Median and MAD don't move much for one extreme value, and recall went to 100%. The test meant to pin this down currently skips, because the fixed seed doesn't give any low-volume customer a planted outlier. It needs its own fixture before it guards anything.",
+    metric: { value: "20→100", unit: "%", label: "outlier recall after swapping mean and standard deviation for median and MAD" },
+    catchLine: "My outlier rule was measuring each outlier against itself.",
+    stack: ["Python", "DuckDB (window functions, haversine SQL)", "Plotly", "pytest", "GitHub Actions", "Bicep (private endpoints, immutable ADLS, Purview, Key Vault RBAC)"],
     repo: "https://github.com/vabhishek8/aml-transaction-monitoring-pipeline",
     live: "https://vabhishek8.github.io/aml-transaction-monitoring-pipeline/"
   },
   {
     id: "basel",
-    arch: ["Synthetic daily balance sheet", "HQLA classification with the 40% Level 2 and nested 15% Level 2B caps", "LCR and NSFR calculation", "Golden-value regression tests", "Dashboard on a daily GitHub Actions run"],
-    iac: "Bicep: Synapse Dedicated SQL Pool, geo-redundant ADLS Gen2, pending and submitted containers for maker-checker, Key Vault RBAC.",
-    badge: "Live pipeline · scheduled daily",
+    workflow: "basel-liquidity-reporting-pipeline",
+    flow: {
+      source: ["Synthetic daily balance sheet", "10 asset, 2 inflow, 12 liability, 2 off-balance categories"],
+      bronze: ["Raw line items", "JSONL"],
+      gate: "schema · domain · range · completeness",
+      silver: ["balance_sheet.parquet", "validated"],
+      gold: [["HQLA capping waterfall", "Level 1, 2A, 2B"], ["Net cash outflow", "runoff minus capped inflows"], ["ASF and RSF", "aggregation"]],
+      goldOut: "LCR = HQLA / NCO, NSFR = ASF / RSF",
+      serve: ["Dashboard", "GitHub Pages"]
+    },
+    iac: "The Bicep matches this workload's shape: a Synapse Dedicated SQL Pool for a fixed nightly batch, geo-redundant ADLS Gen2, and separate pending and submitted containers for a maker-checker control.",
     domain: "Regulatory reporting",
     title: "Basel III Liquidity Reporting Pipeline",
-    subtitle: "LCR / NSFR",
+    subtitle: "LCR and NSFR",
     body:
-      "A regulatory liquidity reporting pipeline computing LCR and NSFR for a synthetic bank's daily balance sheet, structurally consistent with APRA APS 210 and the underlying BCBS238/BCBS295 standards, checked against hand-calculated golden values rather than spot-checked for plausibility. A first implementation of the HQLA cap applied only the 40% Level 2 total cap and missed the nested 15% Level 2B sub-cap required by the spec, overstating HQLA by roughly $65 million (about 8%) on a Level 2B-heavy portfolio; the fix is now a regression-guarded test, not just a corrected formula. Bicep IaC maps this workload's actual shape: a Synapse Dedicated SQL Pool for a fixed nightly batch against a hard deadline, geo-redundant storage, and separate pending-submission / submitted containers modelling a maker-checker control.",
-    metric: { value: "$65M", unit: "", label: "HQLA overstatement caught by golden-value tests (~8%)" },
-    catchLine: "Missed nested 15% Level 2B sub-cap, caught against hand-calculated golden values.",
+      "LCR and NSFR for a made-up bank's daily balance sheet, following the structure of APRA APS 210. The ratios are checked against values I calculated by hand, not eyeballed for plausibility. My first HQLA cap applied the 40% Level 2 limit and missed the 15% Level 2B limit nested inside it. On a portfolio heavy in Level 2B that overstated HQLA by about $65 million, roughly 8%. The fixed version runs every day, and the wrong version is still in the code on purpose, because the regression test needs something to fail against.",
+    bug: "BCBS238 paragraph 51 is two caps, not one. My first version applied only the 40% cap to Level 2A plus 2B. The fix caps Level 2B first, then caps the combined Level 2. The naive SQL stays in the file so the test has something concrete to compare against.",
+    metric: { value: "$65M", unit: "", label: "HQLA overstatement caught by the hand-calculated tests (8.4%)" },
+    catchLine: "The Level 2 cap is two caps. I'd only written one.",
     stack: ["Python", "DuckDB", "Plotly", "pytest", "GitHub Actions", "Bicep (Synapse Dedicated SQL Pool, ADLS Gen2 GRS, Key Vault RBAC)"],
     repo: "https://github.com/vabhishek8/basel-liquidity-reporting-pipeline",
     live: "https://vabhishek8.github.io/basel-liquidity-reporting-pipeline/"
@@ -230,39 +253,39 @@ export const PROJECTS = [
 export const DELIVERY = [
   {
     tags: ["SQL Server", "SSIS", "Databricks"],
-    title: "Pipeline engineering, on-prem to Azure",
-    body: "Production pipelines that ingest and transform data from multiple source systems: SQL Server stored procedures, SQL Agent jobs and SSIS on the database side, Databricks / PySpark into Azure Data Lake Storage and Synapse on the platform side, with a SQL modelling layer that turns raw data into domain datasets for Power BI and SSRS.",
-    impact: "One modelled source of truth for downstream reporting, instead of ad-hoc queries."
+    title: "Pipelines on-prem and in Azure",
+    body: "On the SQL Server side it's stored procedures, SQL Agent jobs and SSIS. On the Azure side it's Databricks and PySpark writing into ADLS and Synapse. Both feed a SQL model that Power BI and SSRS read from.",
+    impact: "Reports read from one modelled source instead of their own ad-hoc queries."
   },
   {
-    tags: ["Azure DevOps", "CI/CD", "DEV → PROD"],
-    title: "Release governance for data artefacts",
-    body: "CI/CD pipelines and branching strategies in Azure DevOps, with environment separation across DEV, SIT, UAT and PROD, and UAT validation before every production deployment.",
-    impact: "Standardised deployments and lower release risk across environments."
+    tags: ["Azure DevOps", "CI/CD", "DEV to PROD"],
+    title: "Release governance for data changes",
+    body: "Azure DevOps pipelines and a branching strategy that move SQL and data changes through DEV, SIT, UAT and PROD. Every production deploy is validated in UAT first.",
+    impact: "Deployments run the same way every time, which is most of what makes them safe."
   },
   {
     tags: ["SQL Agent", "Dependency mapping", "Cutover"],
-    title: "Estate-wide file-server decommission",
-    body: "Swept every SQL Agent job step for references to a retiring host, then separated live jobs from parked ones and mapped coupled producer → consumer steps (bcp, sqlcmd and SSIS writers feeding email and copy steps) so each pair cut over together. The sweep also found references to other decommissioned hosts that a single-host search would have missed.",
-    impact: "~28 job steps across ~20 jobs re-pointed as one controlled change."
+    title: "Retiring a file server",
+    body: "A file server was being decommissioned, so I searched every SQL Agent job step for references to it. Then I split live jobs from parked ones and paired up the steps that depended on each other (bcp, sqlcmd and SSIS writers feeding email and copy steps) so each pair moved together. The search also found references to other retired hosts that a single-host search would have missed.",
+    impact: "About 28 job steps across 20 jobs, repointed in one controlled change."
   },
   {
     tags: ["T-SQL", "OPENJSON", "SSRS"],
-    title: "Document metadata search pipeline",
-    body: "Layered pipeline: bulk-loaded CSV/JSON staging, OPENJSON shredding with ROW_NUMBER() de-duplication, an indexed target table, a view layer and a catch-all search procedure behind an SSRS report.",
-    impact: "Scaled from 12 to 17 source files through a standard runbook and four validation gates, with no report changes."
+    title: "Document metadata search",
+    body: "CSV and JSON files are bulk-loaded into staging, shredded with OPENJSON, de-duplicated with ROW_NUMBER() and written to an indexed table. A view layer and one search procedure sit behind an SSRS report.",
+    impact: "It grew from 12 source files to 17 with a runbook and four validation gates, and the report didn't need to change."
   },
   {
-    tags: ["Observability", "Data quality"],
-    title: "Pipeline monitoring & alerting",
-    body: "End-to-end monitoring and alerting for critical data pipelines, closing the gap between “pipeline failed” and “someone noticed,” with a structured path to root cause.",
-    impact: "Fewer undetected failures and faster mean time to resolution."
+    tags: ["Monitoring", "Data quality"],
+    title: "Monitoring and alerting",
+    body: "Alerting on the critical pipelines, so the time between a job failing and someone knowing about it is short, and there's a clear path to the cause.",
+    impact: "Fewer failures that nobody noticed, and faster fixes."
   },
   {
     tags: ["Power BI", "DAX", "Automation"],
     title: "Power BI refresh automation",
-    body: "Automated dataset refresh pipelines and reporting data flows that were previously manual, rebuilding the delivery path from source to dashboard.",
-    impact: "~40% less manual reporting effort; freshness from daily to near-real-time."
+    body: "Dataset refreshes and reporting data flows that people used to run by hand now run on their own.",
+    impact: "About 40% less manual reporting effort. The data went from daily to near-real-time."
   }
 ];
 
@@ -297,6 +320,20 @@ export const CERTS = [
 
 export const CERT_NOTE =
   "Next: DP-700 (Microsoft Fabric Data Engineer Associate), plus a Jira analytics lakehouse built in public.";
+
+// "Now" line. Source: memory notes list DP-700 and a Jira analytics lakehouse as
+// the next milestones (Sep 2026). [EDIT] Confirm both are still current, and
+// bump the month, before publishing.
+export const NOW = {
+  month: "November 2026",
+  text: "Studying for DP-700 and starting a Jira analytics lakehouse, built in public."
+};
+
+export const COLOPHON = [
+  "This site is React and Vite, with GSAP for the motion. It's hosted on Azure Static Web Apps and deploys from GitHub Actions on every push, with a preview environment for each pull request. The contact form posts to an Azure Function.",
+  "Archivo for the big headings, Instrument Serif for the italics, Inter for reading and JetBrains Mono for the small labels. All four are self-hosted, so nothing loads from Google.",
+  "The pipeline statuses come straight from the GitHub API, fetched by your browser and cached for ten minutes. If they're missing, GitHub's hourly limit for anonymous requests probably ran out."
+];
 
 export const CONTACT = {
   lede: "Open to Azure Data Engineer / Senior Data Engineer roles. Based in Sydney, open to relocation."
