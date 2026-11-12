@@ -15,7 +15,8 @@
     ".js": "application/javascript",
     ".json": "application/json",
     ".svg": "image/svg+xml",
-    ".webmanifest": "application/manifest+json"
+    ".webmanifest": "application/manifest+json",
+    ".avif": "image/avif"
   },
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
