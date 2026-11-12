@@ -294,6 +294,7 @@ html.anim .hb-scroll i::after { animation: drip 1.6s var(--ease) infinite; }
 .about-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(40px, 7vw, 120px); }
 .about-copy p { color: var(--ink-2); font-size: 17px; max-width: 62ch; }
 .about-copy p + p { margin-top: 22px; }
+.about-copy .about-lede-m + p { margin-top: 0; } /* hidden mobile-only lede must not shift desktop */
 .about-copy p.lead { color: var(--ink); font-size: clamp(19px, 1.6vw, 23px); line-height: 1.5; }
 .stats { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); align-self: start; }
 .stat { padding: 28px 22px 28px 0; border-bottom: 1px solid var(--line); }
@@ -891,7 +892,6 @@ html.menu-open .site-header { backdrop-filter: none; -webkit-backdrop-filter: no
 html.anim .figure-layer:not(.is-in) { --fig-in: 0; }
 .fig-pose { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; }
 .fig-pose.is-active { opacity: 1; }
-.fig-pose picture, .hero-photo picture { display: contents; }
 .fig-pose img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; transform-origin: 50% 100%; }
 /* The about / work / contact poses come from 448x600 tiles (upscaled). Cap
    their rendered size so they are never shown much beyond their effective
@@ -913,4 +913,4 @@ html.anim .fig-pose.is-active img { animation: fig-breath 6s ease-in-out infinit
 
 
 /* Mobile-only elements are hidden on desktop; mobile.css owns their layout */
-.hero-photo, .portrait-band { display: none; }
+.hero-photo, .portrait-band, .about-lede-m { display: none; }
