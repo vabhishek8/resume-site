@@ -4,6 +4,7 @@ import App from "./App.jsx";
 import { ensureScrollable } from "./lib/scrollLock.js";
 import "./fonts.css";
 import "./index.css";
+import "./mobile.css";
 
 // Decide motion mode before first paint so animated elements never flash.
 (() => {

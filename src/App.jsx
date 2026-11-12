@@ -2,6 +2,7 @@ import { Header, Footer, ScrollProgress, Cursor, Marquee, StoryRail } from "./co
 import { CaseStudy, useCaseStudy } from "./components/CaseStudy.jsx";
 import Hero from "./components/Hero.jsx";
 import Figure from "./components/Figure.jsx";
+import PortraitBand from "./components/PortraitBand.jsx";
 import { About, Medallion, Skills, Experience, Projects, Education, Contact } from "./components/Sections.jsx";
 import { useSiteEffects } from "./hooks/useSiteEffects.js";
 
@@ -26,6 +27,7 @@ export default function App() {
         <Experience />
         <Projects onOpenCase={cases.open} />
         <Education />
+        <PortraitBand pose="contact" />
         <Contact />
       </main>
       <Footer />
