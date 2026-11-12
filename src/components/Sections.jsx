@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Heading } from "./Chrome.jsx";
+import SectionFigure from "./SectionFigure.jsx";
 import {
   ABOUT, MEDALLION, SKILLS, EXPERIENCE, PROJECTS, DELIVERY, EDUCATION, CERTS, CERT_NOTE, CONTACT, SITE
 } from "../content.js";
@@ -8,6 +9,7 @@ import {
 export function About() {
   return (
     <section id="about" className="section about" aria-labelledby="about-h">
+      <SectionFigure pose="about" />
       <Heading
         id="about-h"
         label="About"
@@ -41,6 +43,7 @@ const NODE_X = [80, 330, 580, 830, 1080];
 export function Medallion() {
   return (
     <section className="section medallion" aria-labelledby="arch-h" data-medallion>
+      <SectionFigure pose="work" />
       <div className="med-pin">
         <div className="med-top">
           <Heading
@@ -113,6 +116,7 @@ const EVIDENCE = { prod: "In production", built: "Public repo" };
 export function Skills() {
   return (
     <section id="skills" className="section skills" aria-labelledby="skills-h">
+      <SectionFigure pose="hero" />
       <Heading id="skills-h" label="Skills" lines={[["bold", "Capabilities,"], ["serif", "not buzzwords"]]} />
       <div className="sec-lede skills-lede" data-reveal>
         <p>Grouped by what a data platform needs, not by tool count. No self-rated bars: each tool is tagged with where you can check it.</p>
@@ -175,6 +179,7 @@ function Role({ e }) {
 export function Experience() {
   return (
     <section id="experience" className="section experience" aria-labelledby="exp-h">
+      <SectionFigure pose="hero" />
       <Heading id="exp-h" label="Experience" lines={[["bold", "Track"], ["serif", "record"]]} />
       <div className="timeline" data-timeline>
         <span className="tl-rail" aria-hidden="true"><span className="tl-fill" data-tl-fill></span></span>
@@ -190,6 +195,7 @@ export function Experience() {
 export function Projects({ onOpenCase = () => {} }) {
   return (
     <section id="projects" className="section projects" aria-labelledby="proj-h">
+      <SectionFigure pose="work" />
       <Heading id="proj-h" label="Projects" lines={[["bold", "Selected"], ["serif", "engineering work"]]} />
       <p className="sec-lede" data-reveal>Framed by architecture and outcome, not by dashboard count.</p>
 
@@ -253,6 +259,7 @@ export function Projects({ onOpenCase = () => {} }) {
 export function Education() {
   return (
     <section id="education" className="section education" aria-labelledby="edu-h">
+      <SectionFigure pose="hero" />
       <Heading id="edu-h" label="Education & Certifications" lines={[["bold", "The"], ["serif", "foundations"]]} />
       <div className="edu-grid">
         <ol className="edu-list">
@@ -323,6 +330,7 @@ export function Contact() {
 
   return (
     <section id="contact" className="section contact" aria-labelledby="contact-h">
+      <SectionFigure pose="contact" />
       <Heading
         id="contact-h"
         label="Contact"
