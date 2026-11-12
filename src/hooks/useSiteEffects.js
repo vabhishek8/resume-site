@@ -49,7 +49,10 @@ export function useSiteEffects() {
       };
 
       const pre = document.querySelector(".preloader");
-      if (pre && !reduce && !seenPreloader()) {
+      // Mobile (<900px) skips the preloader: it gated first paint on the JS
+      // bundle and competed with the hero for the one-motion budget.
+      const mobile = window.matchMedia("(max-width: 899px)").matches;
+      if (pre && !reduce && !mobile && !seenPreloader()) {
         const counter = pre.querySelector("[data-pre-count]");
         const obj = { v: 0 };
         const tl = gsap.timeline({ onComplete: () => { markPreloaded(); pre.remove(); } });
