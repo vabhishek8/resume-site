@@ -182,7 +182,7 @@ export const PROJECTS = [
       bronze: ["Raw JSON", "one file per city per run"],
       gate: "schema · nulls · ranges · dupes · consistency",
       silver: ["weather_daily.parquet", "typed, de-duplicated"],
-      gold: [["DuckDB SQL", "30-day rolling average and z-score"], ["Extreme heat", "90th percentile flag"]],
+      gold: [["DuckDB SQL", "30-day rolling average and z-score"], ["Extreme heat", "95th percentile of the trailing 90 days"]],
       serve: ["Plotly dashboard", "GitHub Pages"]
     },
     iac: "Bicep maps the same design to Data Factory, ADLS Gen2, Synapse Serverless SQL, Key Vault and Log Analytics alerting. I don't leave it running.",
@@ -190,7 +190,7 @@ export const PROJECTS = [
     title: "AU Weather Medallion Pipeline",
     subtitle: "bronze → silver → gold",
     body:
-      "Daily weather for the five largest Australian capitals, pulled from Open-Meteo. I started on the forecast endpoint, and the quality gate kept warning about null humidity, because that endpoint goes sparse beyond a short lookback. The warnings were right, so I moved to the archive endpoint. DuckDB works out 30-day rolling anomalies and flags days above the 90th percentile for heat. There's a Bicep template for the Azure version too, which I don't leave running. Paying for an always-on estate to process five rows a day would be a strange call.",
+      "Daily weather for the five largest Australian capitals, pulled from Open-Meteo. I started on the forecast endpoint, and the quality gate kept warning about null humidity, because that endpoint goes sparse beyond a short lookback. The warnings were right, so I moved to the archive endpoint. DuckDB works out 30-day rolling anomalies and flags days at or above the 95th percentile of the last 90 for heat. There's a Bicep template for the Azure version too, which I don't leave running. Paying for an always-on estate to process five rows a day would be a strange call.",
     bug: "I pointed it at the forecast endpoint first. Past a short lookback it returns sparse daily humidity, and the null check flagged it on the first runs. I changed the source, not the check.",
     metric: { value: "15", unit: "/15", label: "pytest cases passing, run before every scheduled pipeline run" },
     catchLine: "The warnings were right. I changed the source, not the check.",
