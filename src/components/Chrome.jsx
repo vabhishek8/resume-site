@@ -83,8 +83,12 @@ export function Header() {
                   e.preventDefault();
                   setOpen(false);
                   setTimeout(() => {
-                    const t = document.getElementById(l.id);
-                    if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY, behavior: "smooth" });
+                    let t = document.getElementById(l.id);
+                    // Contact is introduced by its portrait band on phones
+                    if (t && t.previousElementSibling && t.previousElementSibling.classList.contains("portrait-band")) t = t.previousElementSibling;
+                    const header = document.querySelector(".site-header");
+                    const offset = header ? header.getBoundingClientRect().height : 0;
+                    if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - offset, behavior: "smooth" });
                   }, 60);
                 }}
               >

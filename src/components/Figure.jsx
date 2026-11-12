@@ -6,7 +6,7 @@ import { startFigureLayer } from "../lib/figureLayer.js";
    right, full strength in the hero, dimmed behind later sections, with a
    cross-fade to a different pose per section. The hero pose is preloaded
    (see index.html); the other poses get their sources after page load. */
-const SIZES = "(min-width: 1024px) min(690px, 44vw), 360px";
+const SIZES = "(min-width: 1024px) min(690px, 44vw), 100vw";
 const SIZES_SMALL = "(min-width: 1024px) min(566px, 36vw), 300px"; // non-hero poses render at 82%
 const srcSet = (base) => FIGURE.widths.map((w) => `${base}-${w}.webp ${w}w`).join(", ");
 

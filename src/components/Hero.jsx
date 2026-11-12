@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { SITE } from "../content.js";
+import { SITE, FIGURE } from "../content.js";
 import { startMedallionField } from "../lib/medallionField.js";
 
 function SydneyClock() {
@@ -25,6 +25,14 @@ export default function Hero() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    // Phones get a static gradient instead of the particle field (one signature
+    // motion per viewport, and the battery/CPU it saves). The name still
+    // reveals immediately.
+    if (window.matchMedia("(max-width: 899px)").matches) {
+      const reveal = () => window.dispatchEvent(new Event("av:name-ready"));
+      window.addEventListener("av:hero-intro", reveal);
+      return () => window.removeEventListener("av:hero-intro", reveal);
+    }
     const stop = startMedallionField(canvasRef.current, document.querySelector("[data-hero-name]"));
     return stop;
   }, []);
@@ -41,6 +49,18 @@ export default function Hero() {
         <span style={{ "--x": "60%" }}>gold</span>
       </div>
 
+      <figure className="hero-photo" aria-hidden="true">
+        <img
+          alt=""
+          width="1493"
+          height="2000"
+          src={`${FIGURE.poses.hero}-960.webp`}
+          srcSet={FIGURE.widths.map((w) => `${FIGURE.poses.hero}-${w}.webp ${w}w`).join(", ")}
+          sizes="(min-width: 1024px) min(690px, 44vw), 100vw"
+          fetchPriority="high"
+          decoding="async"
+        />
+      </figure>
       <div className="hero-inner">
         <p className="eyebrow hero-eyebrow" data-hero>
           <span className="eyebrow-dash" aria-hidden="true"></span>
