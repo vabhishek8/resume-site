@@ -28,7 +28,9 @@ export function startFigureLayer(wrap) {
       img.removeAttribute("data-srcset"); img.removeAttribute("data-src");
     });
   };
-  const hydrateLater = () => setTimeout(hydrate, 1200);
+  // Only the desktop fixed layer cross-fades poses; phones use per-section images.
+  const hydrateLater = () => { if (window.matchMedia("(min-width: 900px)").matches) setTimeout(hydrate, 1200); };
+  window.matchMedia("(min-width: 900px)").addEventListener?.("change", (e) => { if (e.matches) hydrate(); });
   if (document.readyState === "complete") hydrateLater(); else window.addEventListener("load", hydrateLater, { once: true });
 
   // Fade in after the hero name forms (or immediately for reduced motion)
