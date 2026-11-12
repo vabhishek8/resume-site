@@ -15,6 +15,8 @@ export function About() {
       />
       <div className="about-grid">
         <div className="about-copy">
+          {/* Mobile only: the hero's summary paragraph moves here (hidden on desktop, where it stays in the hero). */}
+          <p className="lead about-lede-m" data-reveal>{SITE.lede}</p>
           {ABOUT.paragraphs.map((p, i) => (
             <p key={i} data-reveal className={i === 0 ? "lead" : ""}>{p}</p>
           ))}

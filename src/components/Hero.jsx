@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SITE, FIGURE } from "../content.js";
 import { startMedallionField } from "../lib/medallionField.js";
 
@@ -21,24 +21,62 @@ function SydneyClock() {
   return <span ref={ref} className="clock">--:--:--</span>;
 }
 
+const MOBILE_MQ = "(max-width: 899px)";
+
+function useMobile() {
+  const [mobile, setMobile] = useState(() => window.matchMedia(MOBILE_MQ).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_MQ);
+    const on = (e) => setMobile(e.matches);
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, []);
+  return mobile;
+}
+
 export default function Hero() {
   const canvasRef = useRef(null);
+  const mobile = useMobile();
+  const heroRef = useRef(null);
 
   useEffect(() => {
-    // Phones get a static gradient instead of the particle field (one signature
-    // motion per viewport, and the battery/CPU it saves). The name still
-    // reveals immediately.
+    // Phones get the magazine-cover hero instead of the particle field. One
+    // passive, rAF-throttled scroll listener drives two things:
+    //  - header.m-clear: transparent header while over the top of the hero
+    //  - --hp (0..1): depth parallax, the subject sinks and the masthead
+    //    rises, so the name slides out from behind his head (transform only).
     if (window.matchMedia("(max-width: 899px)").matches) {
       const reveal = () => window.dispatchEvent(new Event("av:name-ready"));
       window.addEventListener("av:hero-intro", reveal);
-      return () => window.removeEventListener("av:hero-intro", reveal);
+      const hero = heroRef.current;
+      const header = document.querySelector(".site-header");
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let raf = 0;
+      let lastP = -1;
+      const update = () => {
+        raf = 0;
+        const y = window.scrollY;
+        if (header) header.classList.toggle("m-clear", y < 12 && !document.documentElement.classList.contains("menu-open"));
+        if (reduce || !hero) return;
+        const p = Math.min(1, Math.max(0, y / (hero.offsetHeight || 1)));
+        if (Math.abs(p - lastP) > 0.001) { lastP = p; hero.style.setProperty("--hp", p.toFixed(4)); }
+      };
+      const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+      update();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => {
+        window.removeEventListener("av:hero-intro", reveal);
+        window.removeEventListener("scroll", onScroll);
+        if (raf) cancelAnimationFrame(raf);
+        if (header) header.classList.remove("m-clear");
+      };
     }
     const stop = startMedallionField(canvasRef.current, document.querySelector("[data-hero-name]"));
     return stop;
   }, []);
 
   return (
-    <section className="hero" aria-label="Introduction">
+    <section className="hero" aria-label="Introduction" ref={heroRef}>
       <canvas ref={canvasRef} className="hero-canvas" aria-hidden="true"></canvas>
       <div className="hero-vignette" aria-hidden="true"></div>
 
@@ -49,26 +87,24 @@ export default function Hero() {
         <span style={{ "--x": "60%" }}>gold</span>
       </div>
 
-      <figure className="hero-photo" aria-hidden="true">
-        <picture>
-        <source
-          media="(max-width: 899px)"
-          type="image/webp"
-          srcSet={FIGURE.mobileWidths.map((w) => `${FIGURE.poses.hero}-m-${w}.webp ${w}w`).join(", ")}
-          sizes="100vw"
-        />
-        <img
-          alt=""
-          width="1493"
-          height="2000"
-          src={`${FIGURE.poses.hero}-960.webp`}
-          srcSet={FIGURE.widths.map((w) => `${FIGURE.poses.hero}-${w}.webp ${w}w`).join(", ")}
-          sizes="(min-width: 1024px) min(690px, 44vw), 100vw"
-          fetchPriority="high"
-          decoding="async"
-        />
-        </picture>
-      </figure>
+      {/* Mobile-only subject cut-out (layer 2 of the magazine cover). Rendered
+          only below 900px: a detached <img> starts loading as soon as React
+          sets its src, so a CSS-hidden or <picture>-wrapped desktop fallback
+          still downloaded the 110-170 KB desktop asset on phones. */}
+      {mobile && (
+        <figure className="hero-photo" aria-hidden="true">
+          <img
+            alt=""
+            width="1000"
+            height="1250"
+            srcSet={FIGURE.mobileWidths.map((w) => `${FIGURE.poses.hero}-m-${w}.webp ${w}w`).join(", ")}
+            sizes="max(100vw, 58svh)"
+            src={`${FIGURE.poses.hero}-m-800.webp`}
+            fetchPriority="high"
+            decoding="async"
+          />
+        </figure>
+      )}
       <div className="hero-inner">
         <p className="eyebrow hero-eyebrow" data-hero>
           <span className="eyebrow-dash" aria-hidden="true"></span>

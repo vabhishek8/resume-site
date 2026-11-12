@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FIGURE } from "../content.js";
 import { startFigureLayer } from "../lib/figureLayer.js";
 
@@ -9,11 +9,11 @@ import { startFigureLayer } from "../lib/figureLayer.js";
 const SIZES = "(min-width: 1024px) min(690px, 44vw), 100vw";
 const SIZES_SMALL = "(min-width: 1024px) min(566px, 36vw), 300px"; // non-hero poses render at 82%
 const srcSet = (base) => FIGURE.widths.map((w) => `${base}-${w}.webp ${w}w`).join(", ");
-const MOBILE_SRCSET = FIGURE.mobileWidths.map((w) => `${FIGURE.poses.hero}-m-${w}.webp ${w}w`).join(", ");
 
 export default function Figure() {
   const wrapRef = useRef(null);
   useEffect(() => startFigureLayer(wrapRef.current), []);
+  const [mobile] = useState(() => window.matchMedia("(max-width: 899px)").matches);
   const keys = Object.keys(FIGURE.poses).filter((k) => FIGURE.poses[k]);
   if (!keys.length) return null;
 
@@ -24,22 +24,18 @@ export default function Figure() {
         const hero = k === "hero";
         return (
           <div className={"fig-pose pose-" + k + (hero ? " is-active" : "")} data-pose={k} key={k} aria-hidden={hero ? undefined : "true"}>
-            {/* Hero only: on mobile the layer is hidden, but a display:none <img>
-                still downloads; the mobile <source> makes it reuse the hero
-                photo's small crop instead of fetching the desktop asset. */}
-            <picture>
-            {hero && <source media="(max-width: 899px)" type="image/webp" srcSet={MOBILE_SRCSET} sizes="100vw" />}
+            {/* On phones the layer is hidden, so the hero pose is deferred like
+                the others (hydrated if the viewport ever crosses 900px). */}
             <img
               alt={hero ? FIGURE.alt : ""}
               width="1493"
               height="2000"
               sizes={hero ? SIZES : SIZES_SMALL}
               decoding="async"
-              {...(hero
+              {...(hero && !mobile
                 ? { src: `${base}-960.webp`, srcSet: srcSet(base), fetchPriority: "high" }
                 : { "data-src": `${base}-960.webp`, "data-srcset": srcSet(base) })}
             />
-            </picture>
           </div>
         );
       })}
