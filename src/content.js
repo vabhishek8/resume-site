@@ -319,6 +319,9 @@ export const CHAPTERS = [
 // served as transparent WebP at FIGURE.widths. Paths are bases: "<base>-<w>.webp".
 export const FIGURE = {
   widths: [480, 720, 960, 1280],
+  // Mobile (<900px) hero: opaque 4:5 crop on the page background, ~3x lighter
+  // than the transparent 3:4 desktop asset. Files: "<hero>-m-<w>.webp".
+  mobileWidths: [600, 800, 1000],
   poses: {
     hero: "/img/figure/hero",       // chest-up, facing camera (IMG_1810)
     about: "/img/figure/about",     // three-quarter, hands in pockets
