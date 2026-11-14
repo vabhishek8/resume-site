@@ -1,34 +1,38 @@
-import Header from "./components/Header.jsx";
+import { Header, Footer, ScrollProgress, Cursor, Marquee, StoryRail } from "./components/Chrome.jsx";
+import { CaseStudy, useCaseStudy } from "./components/CaseStudy.jsx";
 import Hero from "./components/Hero.jsx";
-import About from "./components/About.jsx";
-import Skills from "./components/Skills.jsx";
-import Experience from "./components/Experience.jsx";
-import Projects from "./components/Projects.jsx";
-import Education from "./components/Education.jsx";
-import Contact from "./components/Contact.jsx";
-import Footer from "./components/Footer.jsx";
-import ScrollProgress from "./components/ScrollProgress.jsx";
+import Figure from "./components/Figure.jsx";
+import PortraitBand from "./components/PortraitBand.jsx";
+import { About, Medallion, Skills, Experience, Projects, Education, Contact } from "./components/Sections.jsx";
 import { useSiteEffects } from "./hooks/useSiteEffects.js";
 
 export default function App() {
   useSiteEffects();
+  const cases = useCaseStudy();
 
   return (
     <>
       <ScrollProgress />
+      <Cursor />
       <a className="skip-link" href="#main">Skip to content</a>
-      <div className="bg-grid" aria-hidden="true"></div>
+      <div className="grain" aria-hidden="true"></div>
       <Header />
+      <Figure />
       <main id="main">
         <Hero />
         <About />
+        <Medallion />
         <Skills />
+        <Marquee />
         <Experience />
-        <Projects />
+        <Projects onOpenCase={cases.open} />
         <Education />
+        <PortraitBand pose="contact" />
         <Contact />
       </main>
       <Footer />
+      <StoryRail />
+      {cases.openId ? <CaseStudy id={cases.openId} onClose={cases.close} /> : null}
     </>
   );
 }

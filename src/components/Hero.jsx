@@ -1,31 +1,147 @@
-export default function Hero() {
-  return (
-    <section className="hero" aria-label="Introduction">
-      <div className="wrap hero-inner">
-        <div className="hero-text">
-          <p className="eyebrow" data-reveal>Sydney, AU &middot; Open to relocation</p>
-          <h1 data-reveal>Building data platforms that don't fall over at 2&nbsp;a.m.</h1>
-          <p className="hero-role" data-reveal>
-            Senior Business Intelligence Engineer&ensp;<span className="arrow" aria-hidden="true">&rarr;</span>&ensp;Azure Data Engineer
-          </p>
-          <p className="hero-lede" data-reveal>
-            4+ years architecting ETL/ELT pipelines, data models, and CI/CD-governed delivery on Microsoft Azure
-            (Azure Data Factory, Databricks, Data Lake Storage, and Synapse) for teams that need the data to just be there, correctly, on time.
-          </p>
-          <div className="hero-actions" data-reveal>
-            <a className="btn btn-primary" href="#experience">View experience</a>
-            <a className="btn btn-ghost" href="#contact">Get in touch</a>
-          </div>
-        </div>
+import { useEffect, useRef, useState } from "react";
+import { SITE, FIGURE } from "../content.js";
+import { startMedallionField } from "../lib/medallionField.js";
 
-        <div className="hero-portrait" data-reveal>
-          <div className="portrait-frame">
-            <img src="/img/portrait.jpg" alt="Portrait of Abhishek Vadlamudi" width="720" height="960" loading="eager" fetchPriority="high" />
-          </div>
+function SydneyClock() {
+  const ref = useRef(null);
+  useEffect(() => {
+    let fmt;
+    try {
+      fmt = new Intl.DateTimeFormat("en-AU", {
+        timeZone: "Australia/Sydney", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+      });
+    } catch {
+      return;
+    }
+    const tick = () => { if (ref.current) ref.current.textContent = fmt.format(new Date()); };
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, []);
+  return <span ref={ref} className="clock">--:--:--</span>;
+}
+
+const MOBILE_MQ = "(max-width: 899px)";
+
+function useMobile() {
+  const [mobile, setMobile] = useState(() => window.matchMedia(MOBILE_MQ).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_MQ);
+    const on = (e) => setMobile(e.matches);
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, []);
+  return mobile;
+}
+
+export default function Hero() {
+  const canvasRef = useRef(null);
+  const mobile = useMobile();
+  const heroRef = useRef(null);
+
+  useEffect(() => {
+    // Phones get the magazine-cover hero instead of the particle field. One
+    // passive, rAF-throttled scroll listener drives two things:
+    //  - header.m-clear: transparent header while over the top of the hero
+    //  - --hp (0..1): depth parallax, the subject sinks and the masthead
+    //    rises, so the name slides out from behind his head (transform only).
+    if (window.matchMedia("(max-width: 899px)").matches) {
+      const reveal = () => window.dispatchEvent(new Event("av:name-ready"));
+      window.addEventListener("av:hero-intro", reveal);
+      const hero = heroRef.current;
+      const header = document.querySelector(".site-header");
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let raf = 0;
+      let lastP = -1;
+      const update = () => {
+        raf = 0;
+        const y = window.scrollY;
+        if (header) header.classList.toggle("m-clear", y < 12 && !document.documentElement.classList.contains("menu-open"));
+        if (reduce || !hero) return;
+        const p = Math.min(1, Math.max(0, y / (hero.offsetHeight || 1)));
+        if (Math.abs(p - lastP) > 0.001) { lastP = p; hero.style.setProperty("--hp", p.toFixed(4)); }
+      };
+      const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+      update();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => {
+        window.removeEventListener("av:hero-intro", reveal);
+        window.removeEventListener("scroll", onScroll);
+        if (raf) cancelAnimationFrame(raf);
+        if (header) header.classList.remove("m-clear");
+      };
+    }
+    const stop = startMedallionField(canvasRef.current, document.querySelector("[data-hero-name]"));
+    return stop;
+  }, []);
+
+  return (
+    <section className="hero" aria-label="Introduction" ref={heroRef}>
+      <canvas ref={canvasRef} className="hero-canvas" aria-hidden="true"></canvas>
+      <div className="hero-vignette" aria-hidden="true"></div>
+
+      <div className="hero-gates" aria-hidden="true">
+        <span style={{ "--x": "0%" }}>raw</span>
+        <span style={{ "--x": "24%" }}>bronze</span>
+        <span style={{ "--x": "42%" }}>silver</span>
+        <span style={{ "--x": "60%" }}>gold</span>
+      </div>
+
+      {/* Mobile-only subject cut-out (layer 2 of the magazine cover). Rendered
+          only below 900px: a detached <img> starts loading as soon as React
+          sets its src, so a CSS-hidden or <picture>-wrapped desktop fallback
+          still downloaded the 110-170 KB desktop asset on phones. */}
+      {mobile && (
+        <figure className="hero-photo" aria-hidden="true">
+          <img
+            alt=""
+            width="1000"
+            height="1250"
+            srcSet={FIGURE.mobileWidths.map((w) => `${FIGURE.poses.hero}-m-${w}.webp ${w}w`).join(", ")}
+            sizes="max(100vw, 58svh)"
+            src={`${FIGURE.poses.hero}-m-800.webp`}
+            fetchPriority="high"
+            decoding="async"
+          />
+        </figure>
+      )}
+      <div className="hero-inner">
+        <p className="eyebrow hero-eyebrow" data-hero>
+          <span className="eyebrow-dash" aria-hidden="true"></span>
+          {SITE.location} · {SITE.availability}
+        </p>
+
+        <h1 className="hero-name" data-hero-name aria-label={`${SITE.name.first} ${SITE.name.last}`}>
+          <span className="line"><span className="line-inner bold">{SITE.name.first}</span></span>
+          <span className="line"><span className="line-inner bold">{SITE.name.last}<span className="dot">.</span></span></span>
+        </h1>
+
+        <p className="hero-tagline" data-hero>
+          {SITE.tagline.plain} <em className="serif">{SITE.tagline.italic}</em>
+        </p>
+
+        <p className="hero-role" data-hero>
+          <span>{SITE.role}</span>
+        </p>
+
+        <p className="hero-lede" data-hero>{SITE.lede}</p>
+
+        <div className="hero-actions" data-hero>
+          <a className="btn btn-primary" href="#experience" data-magnetic data-cursor="Go">
+            <span>View experience</span><span className="btn-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+          <a className="btn btn-ghost" href="#contact" data-magnetic data-cursor="Say hi">
+            <span>Get in touch</span>
+          </a>
         </div>
       </div>
 
-      <p className="hero-scroll-cue" aria-hidden="true">Scroll</p>
+
+      <div className="hero-bar" data-hero>
+        <span><span className="live-dot" aria-hidden="true"></span> SYD <SydneyClock /> AEST</span>
+        <span className="hb-mid">3 live pipelines · scheduled daily</span>
+        <span className="hb-scroll">Scroll <i aria-hidden="true"></i></span>
+      </div>
     </section>
   );
 }

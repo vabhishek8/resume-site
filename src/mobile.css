@@ -1,0 +1,341 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Mobile design system (<900px). Desktop is untouched: every rule below is
+   inside the media query. This file is loaded after index.css and overrides
+   the "squeezed desktop" behaviour with one coherent phone layout.
+
+   Spacing scale (4/8):  4 8 12 16 24 32 48 64 96
+   Gutter:               22px (plus safe-area insets)
+   Section rhythm:       96px top, 0 bottom (next section supplies the gap)
+   Section template:     eyebrow → h2 → lede → content
+   Type scale:           hero name 48-64 · h2 32-40 · h3 20 · body 16/1.6 · small 14 · label 11 mono
+   Radius:               16 (cards, sheet, inputs 12) · pills 999
+   Borders:              1px var(--line-2)
+   Image treatment:      one full-bleed portrait (hero) + one editorial band (before Contact)
+   Motion:               hero masthead rises once (CSS) + scroll parallax; one per section after: content fades up on enter. No kinetic headings,
+                         no particles, no grain, no marquee, no clip-path reveals.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 899px) {
+  :root {
+    --m-gutter: 22px;
+    --m-g-l: max(var(--m-gutter), env(safe-area-inset-left));
+    --m-g-r: max(var(--m-gutter), env(safe-area-inset-right));
+    --m-section: 96px;
+    --m-radius: 16px;
+    --m-h2: clamp(32px, 9.6vw, 40px);
+    --m-h3: 20px;
+    --header-h: 56px;
+  }
+
+  /* ── Remove what doesn't earn its place on a phone ───────────────────── */
+  .grain, .marquee, .scroll-progress, .story-rail, .cursor,
+  .hero-canvas, .hero-vignette, .hero-gates, .hero-bar,
+  .figure-layer, .contact-light, .contact-glow, .footer-kicker,
+  .display .wipe, .med-svg { display: none !important; }
+  html.anim [data-split] .ch { opacity: 1 !important; transform: none !important; }
+  /* First paint is the finished hero: no preloader, no hero fade gated on JS. */
+  .preloader { display: none !important; }
+  html.anim [data-hero] { opacity: 1 !important; transform: none !important; }
+  html.anim [data-hero-name] { opacity: 1 !important; filter: none !important; }
+
+  body { font-size: 16px; line-height: 1.6; }
+  h1, h2, h3, .display, .case-title, .cs-title, .hero-tagline, .case-catch { text-wrap: balance; }
+  html { scroll-padding-top: calc(var(--header-h) + env(safe-area-inset-top)); }
+  main section[id], .medallion { scroll-margin-top: calc(var(--header-h) + env(safe-area-inset-top)); }
+  .portrait-band + .contact { scroll-margin-top: calc(var(--header-h) + env(safe-area-inset-top) + 8px); }
+
+  /* ── Header: sticky, compact, always legible ─────────────────────────── */
+  .site-header,
+  .site-header.is-scrolled,
+  .site-header.is-hidden {
+    height: calc(var(--header-h) + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) var(--m-g-r) 0 var(--m-g-l);
+    transform: none;
+    background: rgba(7, 8, 11, 0.86);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    backdrop-filter: saturate(140%) blur(12px);
+    border-bottom: 0;
+    transition: background 0.3s ease;
+  }
+  /* Over the hero (set by Hero.jsx while scrollY < 12): fully transparent.
+     Default is solid, so the header stays legible if the script never runs. */
+  .site-header.m-clear {
+    background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  .brand-mark { width: 32px; height: 32px; border-radius: 8px; }
+  .nav-toggle { width: 44px; height: 44px; }
+  .mobile-nav { padding: calc(var(--header-h) + 24px) var(--m-g-r) 32px var(--m-g-l); justify-content: flex-start; }
+  .mobile-nav ul { display: grid; gap: 4px; }
+  .mobile-nav a { font-size: 32px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .mobile-nav-foot { margin-top: 24px; }
+
+  /* ── Section template ────────────────────────────────────────────────── */
+  .section {
+    max-width: none;
+    padding: var(--m-section) var(--m-g-r) 0 var(--m-g-l);
+  }
+  .sec-head { margin-bottom: 16px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.16em; gap: 10px; }
+  .eyebrow-dash { width: 20px; }
+  .display, .contact .display, .medallion .display {
+    margin-top: 12px;
+    font-size: var(--m-h2);
+    line-height: 0.95;
+  }
+  .display .serif { font-size: 0.9em; }
+  .display .line { padding-bottom: 0; margin-bottom: 0; }
+  .sec-lede, .skills-lede {
+    margin: 0 0 32px;
+    max-width: none;
+    font-size: 16px; line-height: 1.6; color: var(--ink-2);
+  }
+  .skills-lede p + p { margin-top: 12px; }
+  .bold { font-stretch: 100%; font-variation-settings: "wdth" 100; }
+
+  /* ── Buttons: full-width primary, secondary below, 48px ──────────────── */
+  .btn, .btn-lg { height: 48px; padding: 0 20px; justify-content: center; width: 100%; font-size: 12px; }
+  .hero-actions, .case-actions, .cs-actions { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+  /* ── Hero: magazine cover ───────────────────────────────────────────
+     Three depth layers inside one stacking context:
+       0  page background + rim glow   (.hero background)
+       1  masthead name                (.hero-name, z 1)
+       2  subject cut-out              (.hero-photo, z 2), head overlaps the masthead
+       3  copy in the lower third      (z 3), over the photo's fade to the page
+     The subject's top is derived from the masthead's metrics so the crown
+     always overlaps the bottom of line 2 by the same amount, on every
+     viewport and safe-area inset. Head top sits at 5% of the 4:5 crop. */
+  .hero {
+    --nf: min(13.1vw, 60px);                                     /* masthead size */
+    --name-top: calc(env(safe-area-inset-top) + var(--header-h) + 40px);
+    --name-h: calc(var(--nf) * 1.72);                            /* 2 lines x 0.86 */
+    --sw: max(100vw, 58svh);                                     /* subject width */
+    --s-top: calc(var(--name-top) + var(--name-h) - 0.3 * var(--nf) - 0.0625 * var(--sw)); /* crown overlaps ~30% of line 2 */
+    --hp: 0;                                                     /* scroll progress, set in Hero.jsx */
+    display: block; position: relative; isolation: isolate; overflow: hidden;
+    height: 100vh; height: 100svh; min-height: 600px; padding: 0;
+    background:
+      radial-gradient(70% 42% at 70% 30%, rgba(60, 200, 255, 0.13), transparent 70%),
+      radial-gradient(90% 50% at 30% 20%, rgba(242, 181, 68, 0.05), transparent 70%),
+      var(--bg);
+  }
+  .hero-photo {
+    display: block; position: absolute; z-index: 2; margin: 0;
+    left: 50%; top: var(--s-top); width: var(--sw); aspect-ratio: 4 / 5;
+    transform: translate3d(-50%, calc(var(--hp) * 16svh), 0);
+    will-change: transform; pointer-events: none;
+  }
+  .hero-photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .hero-photo::after {
+    /* fade the chest into the page so the lower-third copy sits on near-solid ground */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(7, 8, 11, 0) 58%, rgba(7, 8, 11, 0.72) 80%, var(--bg) 96%);
+  }
+  .hero-inner {
+    position: absolute; inset: 0; z-index: auto; max-width: none;     /* no stacking context */
+    display: flex; flex-direction: column;
+    padding: calc(env(safe-area-inset-top) + var(--header-h) + 8px) var(--m-g-r)
+             calc(24px + env(safe-area-inset-bottom)) var(--m-g-l);
+  }
+  .hero-inner::before { display: none; }
+  .hero-eyebrow { position: relative; z-index: 3; margin: 0; height: 16px; font-size: 10px; line-height: 16px; letter-spacing: 0.18em; }
+  .hero-name {
+    position: relative; z-index: 1; margin: 16px 0 0;
+    font-size: var(--nf); line-height: 0.86; letter-spacing: -0.035em; white-space: nowrap;
+    transform: translate3d(0, calc(var(--hp) * -10svh), 0); will-change: transform;
+  }
+  .hero-name .line { padding-bottom: 0; margin-bottom: 0; }
+  .hero-tagline, .hero-role, .hero-actions { position: relative; z-index: 3; }
+  .hero-tagline { margin-top: auto; max-width: none; font-size: clamp(21px, 6vw, 25px); line-height: 1.18; }
+  .hero-role { margin-top: 12px; font-size: 10.5px; letter-spacing: 0.14em; color: var(--ink-2); }
+  .hero-lede { display: none; }                                   /* moved to the About lead */
+  .hero-actions {
+    margin-top: 20px; display: flex; align-items: center; gap: 20px;
+  }
+  .hero-actions .btn-primary { width: auto; flex: 0 0 auto; padding: 0 22px; }
+  .hero-actions .btn-ghost {
+    width: auto; height: 48px; padding: 0 2px; border: 0; background: none; border-radius: 0;
+    text-decoration: underline; text-underline-offset: 6px; text-decoration-color: var(--line-2);
+  }
+
+  /* First paint: the masthead rises from behind his head. CSS only, 560ms. */
+  @keyframes mast-in { from { transform: translateY(70%); opacity: 0; } to { transform: none; opacity: 1; } }
+  .hero-name .line-inner { animation: mast-in 0.52s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .hero-name .line:nth-child(2) .line-inner { animation-delay: 0.04s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-name .line-inner { animation: none; }
+    .hero-photo { transform: translate3d(-50%, 0, 0); }
+    .hero-name { transform: none; }
+  }
+
+  /* Short phones (SE): tighten the lower third rather than push the CTA below the fold */
+  @media (max-height: 700px) {
+    .hero-tagline { font-size: 20px; }
+    .hero-actions { margin-top: 16px; }
+  }
+
+  /* ── About ───────────────────────────────────────────────────────────── */
+  .about-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
+  .about-copy p, .about-copy p.lead { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+  .about-copy p.lead { color: var(--ink); font-size: 18px; line-height: 1.5; }
+  .about-copy p + p { margin-top: 16px; }
+  .about-copy p.about-lede-m { display: block; }
+  .about-copy p.about-lede-m + p.lead { margin-top: 16px; color: var(--ink-2); font-size: 16px; line-height: 1.6; }
+  .stats { grid-template-columns: 1fr 1fr; gap: 12px; border-top: 0; }
+  .stat, .stat:nth-child(even), .stat:nth-child(odd) {
+    padding: 16px; border: 1px solid var(--line-2); border-radius: var(--m-radius); border-right: 1px solid var(--line-2);
+  }
+  .stat-num { font-size: 40px; }
+  .stat-label { margin-top: 8px; font-size: 13px; }
+
+  /* ── Architecture: one list, one widget ─────────────────────────────── */
+  .medallion { padding-bottom: 0; }
+  .med-pin { min-height: 0; padding: 0; }
+  .med-top { display: block; margin-bottom: 24px; }
+  .med-top .sec-head { margin-bottom: 24px; }
+  .med-top .run, .run { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .med-top .run-stats, .run-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .run-stats div, .med-top .run-stats div { padding: 12px; border-radius: 12px; }
+  .run-stats dt { font-size: 10px; letter-spacing: 0.1em; }
+  .run-stats dd, .med-top .run-stats dd { font-size: 22px; }
+  .run-note, .med-top .run-note { font-size: 13px; }
+  .med-stage { padding: 0; border: 0; background: none; }
+  .med-stage::before { display: none; }
+  .med-steps { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 8px; }
+  .med-step, .medallion.is-pinned .med-step {
+    opacity: 1; margin: 0; padding: 20px 0; border: 0; border-top: 1px solid var(--line);
+    border-left: 0; background: none;
+  }
+  .med-step:last-child { border-bottom: 1px solid var(--line); }
+  .medallion .med-step .med-step-k { color: var(--c, var(--accent)); }
+  .step-src { --c: #8b93a3; } .step-bronze { --c: var(--bronze); } .step-silver { --c: var(--silver); }
+  .step-gold { --c: var(--gold); } .step-serve { --c: var(--accent); }
+  .med-step h3 { margin: 8px 0 6px; font-size: var(--m-h3); }
+  .med-step p { font-size: 15px; }
+  .med-step .chips { margin-top: 12px; }
+  .med-step.run-hit { background: none; border-left: 0; }
+  .med-step.run-hit h3 { color: var(--accent); }
+
+  /* ── Skills: wrapped chip groups ─────────────────────────────────────── */
+  .skill-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
+  .skill-group { margin: 0; padding: 0; border: 0; }
+  .skill-group h3 { margin-bottom: 12px; font-size: 14px; letter-spacing: 0.08em; color: var(--ink-2); }
+  .skill-group ul { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-row, .skill-row:hover {
+    padding: 8px 12px; gap: 8px; border: 1px solid var(--line-2); border-radius: 999px; background: none;
+    justify-content: flex-start; min-height: 36px;
+  }
+  html.anim .skill-group .skill-row { opacity: 1; transform: none; }
+  .skill-row .ev { order: -1; }
+  .skill-row .ev-txt { display: none; }
+  .skill-name { font-size: 14px; line-height: 1.3; }
+  .legend { gap: 16px; }
+
+  /* ── Experience: simple left-rail list ──────────────────────────────── */
+  .timeline { padding-left: 24px; }
+  .tl-rail { left: 4px; }
+  .tl-node { left: -24px; top: 4px; width: 9px; height: 9px; }
+  .tl-item { display: block; padding-bottom: 48px; }
+  .tl-head { position: static; }
+  .tl-date { font-size: 11px; }
+  .tl-head h3 { margin: 8px 0 4px; font-size: var(--m-h3); line-height: 1.15; }
+  .tl-org { font-size: 18px; }
+  .tl-org span { font-size: 13px; }
+  .tl-body { margin-top: 16px; }
+  .tl-list li { padding: 12px 0 12px 16px; font-size: 15px; line-height: 1.55; }
+  .tl-list li::before { top: 23px; width: 8px; }
+  .tl-more { min-height: 44px; padding: 12px 0; }
+
+  /* ── Projects: clean full-width cards ───────────────────────────────── */
+  .stack { display: grid; gap: 16px; }
+  .case { position: static; margin: 0; }
+  .case-inner {
+    display: grid; grid-template-columns: 1fr; gap: 20px; min-height: 0;
+    padding: 20px; border-radius: var(--m-radius); box-shadow: none;
+  }
+  .case-top { gap: 8px; }
+  .badge { font-size: 10px; padding: 6px 10px; white-space: nowrap; }
+  .case-domain { margin-top: 16px; font-size: 11px; }
+  .case-title { margin-top: 8px; font-size: 26px; line-height: 1; overflow-wrap: normal; }
+  .case-sub { margin-top: 6px; font-size: 20px; }
+  .case-body {
+    margin-top: 12px; font-size: 15px; line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .case-side { gap: 16px; padding: 16px 0 0; border: 0; border-top: 1px solid var(--line); }
+  .cm-value { font-size: 44px; text-shadow: none; }
+  .cm-label { margin-top: 6px; font-size: 13px; }
+  .case-catch { font-size: 18px; }
+  .case-side .chips li { font-size: 10px; padding: 6px 9px; }
+  .case-actions { grid-template-columns: 1fr 1fr; }
+  .case-actions .btn:first-child { grid-column: 1 / -1; }
+
+  .delivery { margin-top: 64px; }
+  .delivery-grid { grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+  .dcard { padding: 20px; border-radius: var(--m-radius); }
+  .dcard h3 { font-size: 18px; margin: 12px 0 8px; }
+  .dcard p { font-size: 15px; }
+
+  /* ── Education: same list language as Experience ───────────────────── */
+  .edu-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
+  .edu-item { display: block; padding: 20px 0; border-top: 1px solid var(--line); }
+  .edu-date { font-size: 11px; padding: 0; }
+  .edu-item h3 { margin-top: 8px; font-size: 18px; line-height: 1.2; }
+  .edu-school { font-size: 17px; }
+  .edu-item ul li { font-size: 15px; }
+  .certs { padding: 20px; border-radius: var(--m-radius); }
+
+  /* ── Editorial portrait band (before Contact) ───────────────────────── */
+  .portrait-band {
+    display: block; position: relative; margin: var(--m-section) 0 0; height: min(72vh, 620px); overflow: hidden;
+  }
+  .portrait-band img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%; }
+  .portrait-band::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, var(--bg) 0%, rgba(7, 8, 11, 0) 22%, rgba(7, 8, 11, 0) 60%, var(--bg) 100%);
+  }
+  .portrait-band + .contact { padding-top: 0; margin-top: -48px; }
+
+  /* ── Contact ─────────────────────────────────────────────────────────── */
+  .contact { overflow: visible; padding-bottom: 64px; }
+  .contact-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
+  .cform { gap: 16px; }
+  .field input, .field textarea {
+    padding: 22px 14px 10px; border: 1px solid var(--line-2); border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02); font-size: 16px;
+  }
+  .field input { height: 56px; }
+  .field textarea { min-height: 132px; }
+  .field label { left: 14px; top: 20px; }
+  .field input:focus + label, .field input:not(:placeholder-shown) + label,
+  .field textarea:focus + label, .field textarea:not(:placeholder-shown) + label { transform: translateY(-12px) scale(0.8); }
+  .cform .btn { margin-top: 8px; }
+  .links a, .links .static { grid-template-columns: 1fr auto; gap: 4px 12px; padding: 16px 0; min-height: 44px; }
+  .links .lk { grid-column: 1 / -1; }
+  .lv { font-size: 15px; }
+
+  /* ── Footer ──────────────────────────────────────────────────────────── */
+  .site-footer { padding: 48px var(--m-g-r) calc(32px + env(safe-area-inset-bottom)) var(--m-g-l); }
+  .footer-giant {
+    text-align: left; white-space: normal; font-size: 40px; line-height: 0.95; margin-bottom: 24px;
+    background: linear-gradient(180deg, rgba(236, 234, 227, 0.95), rgba(236, 234, 227, 0.35)) !important;
+    -webkit-background-clip: text !important; background-clip: text !important;
+  }
+  .footer-row { display: grid; gap: 8px; }
+  .footer-row a { min-height: 44px; display: inline-flex; align-items: center; }
+
+  /* ── Case study: full-screen sheet ──────────────────────────────────── */
+  .cs-backdrop { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .cs { margin: 0; border: 0; border-radius: 0; box-shadow: none; padding-top: env(safe-area-inset-top); }
+  .cs-top { padding: 12px var(--m-g-r) 12px var(--m-g-l); }
+  .cs-top { justify-content: flex-end; }
+  .cs-top .badge { display: none; }
+  .cs-close { min-height: 44px; }
+  .cs-scroll { padding: 24px var(--m-g-r) calc(48px + env(safe-area-inset-bottom)) var(--m-g-l); }
+  .cs-title { font-size: 30px; }
+  .cs-sub { font-size: 20px; }
+  .cs-hero { margin-top: 24px; gap: 16px; padding-bottom: 24px; }
+  .cs-block { padding: 24px 0; }
+  .cs-body { font-size: 15px; }
+}
