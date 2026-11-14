@@ -71,7 +71,7 @@ export const MEDALLION = [
     key: "gold",
     label: "Gold",
     title: "Model & compute",
-    body: "Business logic in SQL: rolling anomaly windows, AML typologies, LCR / NSFR, each checked against golden values.",
+    body: "Business logic in SQL: rolling anomaly windows, AML typologies, LCR / NSFR, each covered by pytest: hand-calculated golden values for LCR / NSFR, injected-case recall for AML.",
     tools: ["DuckDB", "Synapse", "Databricks"]
   },
   {
@@ -179,14 +179,14 @@ export const EXPERIENCE = [
 export const PROJECTS = [
   {
     id: "weather",
-    arch: ["Open-Meteo archive", "Bronze: raw daily pulls", "Quality gate: schema, nulls, range, duplicates, consistency", "DuckDB: rolling 30-day anomalies, P90 heat flags", "Plotly dashboard on a daily GitHub Actions run"],
+    arch: ["Open-Meteo archive", "Bronze: raw daily pulls", "Quality gate: schema, nulls, range, duplicates, consistency", "DuckDB: rolling 30-day anomalies, heat flag at P95 of trailing 90 days", "Plotly dashboard on a daily GitHub Actions run"],
     iac: "Bicep maps the same design to Data Factory, ADLS Gen2, Synapse Serverless SQL, Key Vault and Log Analytics alerting, deliberately not left running.",
     badge: "Live pipeline · updates daily",
     domain: "Platform pattern",
     title: "AU Weather Medallion Pipeline",
     subtitle: "bronze → silver → gold",
     body:
-      "A self-built, production-pattern data pipeline for five Australian capital cities: Open-Meteo archive ingestion, an explicit data-quality gate (schema, nulls, range, duplicate, consistency checks), DuckDB SQL for rolling 30-day anomaly detection and 90th-percentile extreme-heat flagging, orchestrated on a real daily schedule via GitHub Actions with 15 passing pytest cases. Ships with Bicep IaC that maps the same design to production Azure (Data Factory, ADLS Gen2, Synapse Serverless SQL, Key Vault, Log Analytics alerting), authored but deliberately not left running 24/7, because a standing cloud estate for a portfolio-scale workload is a cost decision, not a demo requirement.",
+      "A self-built, production-pattern data pipeline for five Australian capital cities: Open-Meteo archive ingestion, an explicit data-quality gate (schema, nulls, range, duplicate, consistency checks), DuckDB SQL for rolling 30-day anomaly detection and an extreme-heat flag for days at or above the 95th percentile of the trailing 90 days, orchestrated on a real daily schedule via GitHub Actions with 15 passing pytest cases. Ships with Bicep IaC that maps the same design to production Azure (Data Factory, ADLS Gen2, Synapse Serverless SQL, Key Vault, Log Analytics alerting), authored but deliberately not left running 24/7, because a standing cloud estate for a portfolio-scale workload is a cost decision, not a demo requirement.",
     metric: { value: "15", unit: "/15", label: "pytest cases passing on a daily GitHub Actions schedule" },
     catchLine: "Cloud estate designed in Bicep, deliberately not left running: cost is a design decision.",
     stack: ["Python", "DuckDB", "Plotly", "pytest", "GitHub Actions", "Bicep IaC (Data Factory / ADLS Gen2 / Synapse)"],
@@ -196,7 +196,7 @@ export const PROJECTS = [
   {
     id: "aml",
     arch: ["Synthetic transactions with injected cases", "SQL typologies: structuring, layering, impossible travel, outliers, high-risk corridors", "Robust median/MAD outlier statistic", "Case-level recall tests in pytest", "Dashboard on a daily GitHub Actions run"],
-    iac: "Bicep: private endpoints everywhere, immutable ADLS storage, Microsoft Purview, Key Vault RBAC.",
+    iac: "Bicep: public network access disabled on every service, private endpoints for storage and Key Vault, immutable ADLS storage, Microsoft Purview, Key Vault RBAC.",
     badge: "Live pipeline · scheduled daily",
     domain: "Banking / financial services",
     title: "AML Transaction Monitoring Pipeline",
