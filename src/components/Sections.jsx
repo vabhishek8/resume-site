@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { Heading } from "./Chrome.jsx";
-import { PipelineStatus, RunBadge } from "./Pipelines.jsx";
 import {
   ABOUT, MEDALLION, SKILLS, EXPERIENCE, PROJECTS, DELIVERY, EDUCATION, CERTS, CERT_NOTE, CONTACT, SITE
 } from "../content.js";
@@ -12,7 +11,7 @@ export function About() {
       <Heading
         id="about-h"
         label="About"
-        lines={[["bold", "Most of the work"], ["serif", "happens before"], ["bold", "the dashboard"]]}
+        lines={[["bold", "Engineering"], ["serif", "the platform,"], ["bold", "not just the report"]]}
       />
       <div className="about-grid">
         <div className="about-copy">
@@ -22,7 +21,18 @@ export function About() {
             <p key={i} data-reveal className={i === 0 ? "lead" : ""}>{p}</p>
           ))}
         </div>
-        <PipelineStatus />
+        <dl className="stats">
+          {ABOUT.stats.map((s) => (
+            <div className="stat" key={s.label} data-reveal>
+              <dt className="stat-num">
+                <span data-count-to={s.to} data-prefix={s.prefix || ""} data-suffix={s.suffix || ""}>
+                  {(s.prefix || "") + s.to + (s.suffix || "")}
+                </span>
+              </dt>
+              <dd className="stat-label">{s.label}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );
@@ -50,7 +60,7 @@ export function Medallion() {
                 <div className="bad"><dt>Quarantined at the gate</dt><dd data-run-n="bad">0</dd></div>
                 <div className="good"><dt>Served from gold</dt><dd data-run-n="gold">0</dd></div>
               </dl>
-              <p className="run-note">This one is a simulation on made-up records. It's here so you can watch bad rows get stopped at the gate.</p>
+              <p className="run-note">Simulated run on synthetic records, so you can watch the gates work.</p>
             </div>
         </div>
         <div className="med-stage">
@@ -105,12 +115,12 @@ const EVIDENCE = { prod: "In production", built: "Public repo" };
 export function Skills() {
   return (
     <section id="skills" className="section skills" aria-labelledby="skills-h">
-      <Heading id="skills-h" label="Skills" lines={[["bold", "What I use"], ["serif", "and where to check"]]} />
+      <Heading id="skills-h" label="Skills" lines={[["bold", "Capabilities,"], ["serif", "not buzzwords"]]} />
       <div className="sec-lede skills-lede" data-reveal>
-        <p>No self-rated skill bars. Each tool says where you can verify it, either my production work at Unisys or a public repo you can read.</p>
+        <p>Grouped by what a data platform needs, not by tool count. No self-rated bars: each tool is tagged with where you can check it.</p>
         <p className="legend">
-          <span className="ev ev-prod"><i aria-hidden="true"></i>Used in production at Unisys</span>
-          <span className="ev ev-built"><i aria-hidden="true"></i>In a public repo</span>
+          <span className="ev ev-prod"><i aria-hidden="true"></i>In production at Unisys</span>
+          <span className="ev ev-built"><i aria-hidden="true"></i>Built &amp; tested in a public repo</span>
         </p>
       </div>
       <div className="skill-grid">
@@ -167,7 +177,7 @@ function Role({ e }) {
 export function Experience() {
   return (
     <section id="experience" className="section experience" aria-labelledby="exp-h">
-      <Heading id="exp-h" label="Experience" lines={[["bold", "Work"], ["serif", "so far"]]} />
+      <Heading id="exp-h" label="Experience" lines={[["bold", "Track"], ["serif", "record"]]} />
       <div className="timeline" data-timeline>
         <span className="tl-rail" aria-hidden="true"><span className="tl-fill" data-tl-fill></span></span>
         <ol className="tl-ol">
@@ -182,8 +192,8 @@ export function Experience() {
 export function Projects({ onOpenCase = () => {} }) {
   return (
     <section id="projects" className="section projects" aria-labelledby="proj-h">
-      <Heading id="proj-h" label="Projects" lines={[["bold", "Three pipelines"], ["serif", "you can inspect"]]} />
-      <p className="sec-lede" data-reveal>They run every day on GitHub Actions. Each one got something wrong at least once, and the fix, the test and the history are all in the repo.</p>
+      <Heading id="proj-h" label="Projects" lines={[["bold", "Selected"], ["serif", "engineering work"]]} />
+      <p className="sec-lede" data-reveal>Framed by architecture and outcome, not by dashboard count.</p>
 
       <div className="stack" data-stack>
         {PROJECTS.map((p, i) => (
@@ -191,7 +201,7 @@ export function Projects({ onOpenCase = () => {} }) {
             <div className="case-inner">
               <div className="case-main">
                 <div className="case-top">
-                  <RunBadge p={p} />
+                  <span className="badge"><span className="live-dot" aria-hidden="true"></span>{p.badge}</span>
                 </div>
                 <p className="case-domain">{p.domain}</p>
                 <h3 className="case-title">{p.title}</h3>
@@ -203,7 +213,7 @@ export function Projects({ onOpenCase = () => {} }) {
                   <p className="cm-value">{p.metric.value}<span>{p.metric.unit}</span></p>
                   <p className="cm-label">{p.metric.label}</p>
                 </div>
-                <p className="case-catch"><span>What went wrong</span>{p.catchLine}</p>
+                <p className="case-catch"><span>The catch</span>{p.catchLine}</p>
                 <ul className="chips">
                   {p.stack.map((s) => <li key={s}>{s}</li>)}
                 </ul>
@@ -245,7 +255,7 @@ export function Projects({ onOpenCase = () => {} }) {
 export function Education() {
   return (
     <section id="education" className="section education" aria-labelledby="edu-h">
-      <Heading id="edu-h" label="Education & Certifications" lines={[["bold", "Where I"], ["serif", "studied"]]} />
+      <Heading id="edu-h" label="Education & Certifications" lines={[["bold", "The"], ["serif", "foundations"]]} />
       <div className="edu-grid">
         <ol className="edu-list">
           {EDUCATION.map((e) => (

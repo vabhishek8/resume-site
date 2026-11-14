@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { SITE } from "../content.js";
+import { useEffect, useRef, useState } from "react";
+import { SITE, FIGURE } from "../content.js";
 import { startMedallionField } from "../lib/medallionField.js";
 
 function SydneyClock() {
@@ -21,8 +21,22 @@ function SydneyClock() {
   return <span ref={ref} className="clock">--:--:--</span>;
 }
 
+const MOBILE_MQ = "(max-width: 899px)";
+
+function useMobile() {
+  const [mobile, setMobile] = useState(() => window.matchMedia(MOBILE_MQ).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_MQ);
+    const on = (e) => setMobile(e.matches);
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, []);
+  return mobile;
+}
+
 export default function Hero() {
   const canvasRef = useRef(null);
+  const mobile = useMobile();
   const heroRef = useRef(null);
 
   useEffect(() => {
@@ -45,8 +59,7 @@ export default function Hero() {
         if (header) header.classList.toggle("m-clear", y < 12 && !document.documentElement.classList.contains("menu-open"));
         if (reduce || !hero) return;
         const p = Math.min(1, Math.max(0, y / (hero.offsetHeight || 1)));
-        // On :root, because the subject (.m-cover) lives outside the React tree
-        if (Math.abs(p - lastP) > 0.001) { lastP = p; document.documentElement.style.setProperty("--hp", p.toFixed(4)); }
+        if (Math.abs(p - lastP) > 0.001) { lastP = p; hero.style.setProperty("--hp", p.toFixed(4)); }
       };
       const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
       update();
@@ -56,7 +69,6 @@ export default function Hero() {
         window.removeEventListener("scroll", onScroll);
         if (raf) cancelAnimationFrame(raf);
         if (header) header.classList.remove("m-clear");
-        document.documentElement.style.removeProperty("--hp");
       };
     }
     const stop = startMedallionField(canvasRef.current, document.querySelector("[data-hero-name]"));
@@ -75,8 +87,24 @@ export default function Hero() {
         <span style={{ "--x": "60%" }}>gold</span>
       </div>
 
-      {/* Mobile subject cut-out: static in index.html (.m-cover) so the LCP
-          image doesn't wait for this bundle. */}
+      {/* Mobile-only subject cut-out (layer 2 of the magazine cover). Rendered
+          only below 900px: a detached <img> starts loading as soon as React
+          sets its src, so a CSS-hidden or <picture>-wrapped desktop fallback
+          still downloaded the 110-170 KB desktop asset on phones. */}
+      {mobile && (
+        <figure className="hero-photo" aria-hidden="true">
+          <img
+            alt=""
+            width="1000"
+            height="1250"
+            srcSet={FIGURE.mobileWidths.map((w) => `${FIGURE.poses.hero}-m-${w}.webp ${w}w`).join(", ")}
+            sizes="max(100vw, 58svh)"
+            src={`${FIGURE.poses.hero}-m-800.webp`}
+            fetchPriority="high"
+            decoding="async"
+          />
+        </figure>
+      )}
       <div className="hero-inner">
         <p className="eyebrow hero-eyebrow" data-hero>
           <span className="eyebrow-dash" aria-hidden="true"></span>
