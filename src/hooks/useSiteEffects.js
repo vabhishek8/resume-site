@@ -28,7 +28,16 @@ export function useSiteEffects() {
     root.classList.toggle("reduce-motion", reduce);
     if (!reduce) root.classList.add("anim");
 
-    const ctx = gsap.context(() => {
+    // A restored scroll position (reload, or back/forward without bfcache)
+    // makes `once` triggers fire and self-kill while later triggers are still
+    // being created, which throws inside ScrollTrigger.refresh and blanked the
+    // page. Build every trigger from the top instead.
+    if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+    if (window.scrollY > 0) window.scrollTo(0, 0);
+
+    const ctx = gsap.context(() => {});
+    try {
+    ctx.add(() => {
       /* ── Preloader + hero intro ───────────────────────────────────────── */
       const heroIntro = () => {
         root.classList.add("is-loaded");
@@ -213,6 +222,13 @@ export function useSiteEffects() {
         });
       });
     });
+    } catch (err) {
+      // Never let a choreography failure unmount the app: revert any partial
+      // tween/trigger state and fall back to the static, fully visible page.
+      console.error("[useSiteEffects] animation setup failed; static page shown instead", err);
+      ctx.revert();
+      root.classList.remove("anim");
+    }
 
     /* ── Run-the-pipeline widget (lazy: wires up when first near view) ── */
     const runRoot = document.querySelector("[data-run]");
