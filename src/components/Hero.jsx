@@ -24,7 +24,7 @@ function SydneyClock() {
 const MOBILE_MQ = "(max-width: 899px)";
 
 function useMobile() {
-  const [mobile, setMobile] = useState(() => window.matchMedia(MOBILE_MQ).matches);
+  const [mobile, setMobile] = useState(() => typeof window !== "undefined" && window.matchMedia(MOBILE_MQ).matches);
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_MQ);
     const on = (e) => setMobile(e.matches);

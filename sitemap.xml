@@ -2,8 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://abhishekvadlamudi.com/</loc>
-    <lastmod>2026-11-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-11-17</lastmod>
+  </url>
+  <url>
+    <loc>https://abhishekvadlamudi.com/writing/</loc>
+    <lastmod>2026-11-23</lastmod>
+  </url>
+  <url>
+    <loc>https://abhishekvadlamudi.com/writing/testing-aml-detection-rules-synthetic-data/</loc>
+    <lastmod>2026-11-23</lastmod>
+  </url>
+  <url>
+    <loc>https://abhishekvadlamudi.com/writing/aml-outlier-detection-robust-zscore-sql/</loc>
+    <lastmod>2026-11-16</lastmod>
   </url>
 </urlset>
