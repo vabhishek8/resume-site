@@ -149,6 +149,7 @@ export function Footer() {
       <div className="footer-row">
         <p>&copy; {year} {SITE.name.first} {SITE.name.last}. Built from scratch, no template.</p>
         <p className="footer-stack">React · GSAP · Azure Static Web Apps</p>
+        <a href="/writing/" data-cursor="Read">Writing</a>
         <a href="#top" data-cursor="Top">Back to top &uarr;</a>
       </div>
     </footer>
