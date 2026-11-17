@@ -13,7 +13,10 @@ const srcSet = (base) => FIGURE.widths.map((w) => `${base}-${w}.webp ${w}w`).joi
 export default function Figure() {
   const wrapRef = useRef(null);
   useEffect(() => startFigureLayer(wrapRef.current), []);
-  const [mobile] = useState(() => window.matchMedia("(max-width: 899px)").matches);
+  // Server render (scripts/prerender.mjs) takes the deferred branch: the static
+  // HTML must not start a desktop hero download on phones. Desktop still gets
+  // the hero early via the media-scoped preload in index.html.
+  const [mobile] = useState(() => typeof window === "undefined" || window.matchMedia("(max-width: 899px)").matches);
   const keys = Object.keys(FIGURE.poses).filter((k) => FIGURE.poses[k]);
   if (!keys.length) return null;
 
